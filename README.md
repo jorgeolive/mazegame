@@ -1,6 +1,6 @@
 # mazegame
 
-This is an WIP project about a CSS based labyrinth multiplayer game, built over the MERN stack.
+This is an WIP project about a CSS-based labyrinth multiplayer game, built over the MERN stack.
 
 It plays with several concepts, such as:
 
