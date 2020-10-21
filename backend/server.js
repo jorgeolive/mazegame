@@ -1,23 +1,26 @@
+let sockets = require('./api/channels/gameroom-channel');
 let express = require('express');
 let app = express();
-var cors = require('cors')
-var http = require('http').createServer(app);
-var io = require('socket.io')(http);
-let port = process.env.PORT || 3000;
 let bodyParser = require('body-parser');
+
+var cors = require('cors');
+app.use(cors());
+
+var server = require('http').createServer(app);
+
+let port = process.env.PORT || 3000;
+
+server.listen(port);
+sockets.gameRoomChannel(server);
 
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(cors());
 
-let mazeRoute = require('./api/routes/mazeRoute');
+let mazeRoute = require('./api/routes/maze-route');
 mazeRoute(app);
 
-let gameRoute = require('./api/routes/gameRoute');
-gameRoute(app, io);
-
-
-app.listen(port);
+//let gameRoute = require('./api/routes/game-route');
+//gameRoute(app);
 
 console.log('MazeGame API server started on: ' + port);

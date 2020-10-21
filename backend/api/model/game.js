@@ -2,11 +2,11 @@ const { Maze } = require("./maze");
 
 class Game {
 
-    constructor(gameid, width, height, maxPlayers, numberOfMonsters) {
-        this.id = gameid;
-        this.maze = new Maze(width, height);
+    constructor(id, width, height, maxPlayers) {
+        this.id = id;
+        this.width = width;
+        this.height = height;
         this.maxPlayers = maxPlayers;
-        this.numberOfMonsters = numberOfMonsters;
         this.players = [];
         this.monsters = [];
         this.isStarted = false;
@@ -30,6 +30,8 @@ class Game {
     }
 
     start() {
+        this.maze = new Maze(this.width, this.height);
+
         if (!allPlayersJoined) {
             throw new Error("Waiting for players to join");
         }

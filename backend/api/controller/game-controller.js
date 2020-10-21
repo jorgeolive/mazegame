@@ -1,8 +1,7 @@
-'use strict';
+/*'use strict';
 
 const { Game } = require("../model/game");
 const Player = require("../model/Player");
-const { Games } = require("../model/activeGames");
 
 exports.create_game = function (req, res) {
 
@@ -10,9 +9,7 @@ exports.create_game = function (req, res) {
     let player = new Player(Math.random() * 1000);
     game.addPlayer(player);
 
-    let games = new Games();
-
-    games.addGame(game);
+    //games.addGame(game);
 
     res.json({
         gameId: game.id,
@@ -24,3 +21,4 @@ exports.create_game = function (req, res) {
     console.log("Finished game creation request.");
 }
 
+*/

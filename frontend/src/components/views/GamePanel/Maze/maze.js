@@ -1,7 +1,7 @@
 import React from 'react';
 import Cell from '../cell/cell';
 
-const shell = (props) =>{
+const Maze = (props) =>{
 
     const cellOrderFunction = (a,b) => {
         if(a.i > b.i) 
@@ -22,12 +22,16 @@ const shell = (props) =>{
           backgroundColor: 'black'
       }
             
+    console.log(props.players);
+    debugger;
+
+      //THIS IS SHIT PERFORMANCE, SHOULD BE A MAP
     return (<div style={styles}>
             {props.cells.
             sort(cellOrderFunction).
-            map(cell => {
-                return <Cell cell={cell} key = {cell.id}></Cell>})}
+            map(cell => { 
+              return <Cell cell={cell} key = {cell.id} id = {cell.id} players = {props.players.filter(x => x.position === cell.id)}></Cell>})}
            </div>);
 }
 
-export default shell;
+export default Maze;
