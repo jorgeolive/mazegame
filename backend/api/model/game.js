@@ -29,15 +29,22 @@ class Game {
         return this.players.find(elem => elem.id = playerId)[0];
     }
 
-    start() {
+    allPlayersJoined(){
+        return this.maxPlayers === this.players.length;
+    }
+
+    init() {
         this.maze = new Maze(this.width, this.height);
 
         if (!allPlayersJoined) {
             throw new Error("Waiting for players to join");
         }
 
-        this.isStarted = true;
         this.players.forEach(plyr => plyr.setPosition(this.maze.getRandomCell()));
+    }
+
+    start(){
+        this.isStarted = true;
     }
 }
 

@@ -1,18 +1,17 @@
 import React from 'react';
 
 const GameListView = (props) => {
-    console.log("any games?" ,props.games != undefined && props.games.length > 0);
-    console.log("games" ,props.games);
 
-    return (<table>
-
-        <thead>
+    return (
+    <table>
+          <thead>
             <tr>
                 <th>Game Id</th>
                 <th>Maze Height</th>
                 <th>Maze Width</th>
                 <th>Players</th>
                 <th>Is Started</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -26,6 +25,7 @@ const GameListView = (props) => {
                             <td>{game.width}</td>
                             <td>{game.players.length}</td>
                             <td>{game.isStarted}</td>
+                            <td><button onClick={(event) => props.onGameJoinHandler(game.id)}>join!</button></td>
                         </tr>);
                 })
                 : null}

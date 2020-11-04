@@ -1,5 +1,6 @@
 class Player {
-    constructor(id) {
+    constructor(id, name) {
+        this.name = name;
         this.id;
         this.hasJoined = false;
     }

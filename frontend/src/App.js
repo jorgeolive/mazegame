@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
 import GameRoom from './components/views/GameRoom/GameRoom';
+import PlayerNameInput from './components/menu/PlayerNameInput';
 //import Shell from './components/views/GamePanel/Maze/shell/shell';
 //import GameStart from './components/menu/newGame/newGame';
 //import Player from './model/player';
@@ -55,6 +56,9 @@ function App() {
             <Shell cells={state.labyrinth} players = {state.players} width={20} height={20} ></Shell></div>
           <div style={flexItemStyle}><GameStart startGameHandler={placePlayer}></GameStart></div>
         </div>*/
+
+
+  const [state, updateState] = useState({ playerName : "" });      
   const styles = {
     display: 'flex',
     justifyContent: 'center',
@@ -65,10 +69,19 @@ function App() {
     padding: '20px 20px 20px 20px'
   }
 
+  let setNameHandler = (name) => {
+    debugger;
+    if(name !== state.playerName)
+      updateState((prevState) => ({playerName : name}));
+  }
+
   return (
     <div style={styles}>
       <div style={flexItemStyle}>
-        <GameRoom></GameRoom>
+        {state.playerName == "" ?
+          <PlayerNameInput setNameHandler = {setNameHandler}></PlayerNameInput>
+        : <GameRoom playerName={state.playerName}></GameRoom>
+      }
       </div>
     </div>
   );

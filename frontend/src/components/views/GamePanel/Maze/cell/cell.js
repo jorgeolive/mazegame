@@ -2,7 +2,7 @@ import React from 'react';
 import Player from '../player/player';
 import './cell.css';
 
-const cell = (props) => {
+const Cell = (props) => {
 
     let classes = 'cell';
 
@@ -17,4 +17,4 @@ const cell = (props) => {
            </div>;
 }
 
-export default cell;
+export default Cell;

@@ -1,5 +1,6 @@
 const { Player } = require('../model/Player');
 const { Game } = require('../model/game');
+let createGameChannel = require('./api/channels/game-channel');
 
 module.exports.gameRoomChannel =  function (app) {
 
@@ -27,13 +28,20 @@ module.exports.gameRoomChannel =  function (app) {
 
         console.info(`Client connected [id=${socket.id}]`);
 
-        socketPool.set(socket, socketPool.size + 1);
-        currentPlayers.set(currentPlayers.size + 1, new Player(currentPlayers.size + 1));
+        socket.on('newPlayerJoined', (player) =>{
+
+            let playerNumber = Math.floor(Math.random()*10000);
+
+            socketPool.set(socket, playerNumber);
+            currentPlayers.set(playerNumber, new Player(playerNumber, player));
+
+            socket.emit('playerIdAssigned', {playerId: playerNumber});
+        } );
 
         socket.on("disconnect", () => {
 
-            let playerId = socketPool.get(socket).id;
-            currentPlayers.delete(x => x.id === playerId);
+            let playerId = socketPool.get(socket);
+            currentPlayers.delete(playerId);
             socketPool.delete(socket);
 
             console.info(`player gone [id=${playerId}]`);     
@@ -42,29 +50,31 @@ module.exports.gameRoomChannel =  function (app) {
 
         socket.on("createGame", (game) => {
             //TODO message validation
+
             let gameId = Math.floor(Math.random()*1000);
-            currentGames.set(gameId, new Game(gameId, game.width, game.height, game.maxPlayers));   
+            let game = new Game(gameId, game.width, game.height, game.maxPlayers);
+
+            currentGames.set(gameId, game);   
+            createGameChannel(app, game); // Create game channel
             notifyUpdate = true;    
         });
 
         socket.on("joinGame", (game) => {
+            //Esta parte creo que sobra.
             let currentGame = currentGames.get(game.id); 
             let player = currentPlayers.filter(x => x.id === socketPool.get(socket));
             currentGame.addPlayer(player); // TODO control de errores.-
             notifyUpdate = true;    
 
-            console.info(`Game has new player...`);      
+            console.info(`player ${player} joined game ${game.id} `);      
 
-            gameRoomNamespace.emit("playerJoinedGame", );
+            gameRoomNamespace.emit("playerJoinedGame", {});
         });
 
         setInterval(() => {
 
-            if (notifyUpdate){
-                const currentGames_ = Array.from(currentGames.values());
-                const currentPlayers_ = Array.from(currentPlayers.values());
-                
-                gameRoomNamespace.emit('roomStateUpdate', {games : currentGames_, players: currentPlayers_});
+            if (notifyUpdate){               
+                gameRoomNamespace.emit('roomStateUpdate', {games : Array.from(currentGames.values()), players: Array.from(currentPlayers.values())});
                 notifyUpdate = false;
             }
             
