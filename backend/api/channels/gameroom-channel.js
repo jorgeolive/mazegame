@@ -1,14 +1,14 @@
 const { Player } = require('../model/Player');
 const { Game } = require('../model/game');
-let createGameChannel = require('./api/channels/game-channel');
-
+let gameChannelSocket = require('./game-channel');
+const { GameEngine } = require('../../game-engine');
 module.exports.gameRoomChannel =  function (app) {
 
     const socketio = require('socket.io')(app, {
         handlePreflightRequest: (req, res) => {
             const headers = {
                 "Access-Control-Allow-Headers": "Content-Type, Authorization",
-                "Access-Control-Allow-Origin": req.headers.origin, //or the specific origin you want to give access to,
+                "Access-Control-Allow-Origin": req.headers.origin, 
                 "Access-Control-Allow-Credentials": true
             };
             res.writeHead(200, headers);
@@ -16,70 +16,69 @@ module.exports.gameRoomChannel =  function (app) {
         }
     });
   
-    const gameRoomNamespace = socketio.of('/game-room');
-    const socketPool = new Map();
+    const connectedSockets = new Map();
     const currentPlayers = new Map();
     const currentGames = new Map();
-    const currentMazes = new Map();
     let notifyUpdate = false;
 
-    gameRoomNamespace.on('connection', function (socket) {
-        notifyUpdate = true; 
+    socketio.on('connection', function (socket) {
 
-        console.info(`Client connected [id=${socket.id}]`);
+        console.info(`[GameRoom Channel ] Client connected [id=${socket.id}]`);
 
         socket.on('newPlayerJoined', (player) =>{
 
+            socket.join('gamesRoom');
+
             let playerNumber = Math.floor(Math.random()*10000);
 
-            socketPool.set(socket, playerNumber);
+            connectedSockets.set(socket, playerNumber);
             currentPlayers.set(playerNumber, new Player(playerNumber, player));
 
             socket.emit('playerIdAssigned', {playerId: playerNumber});
+            notifyUpdate = true;
         } );
 
         socket.on("disconnect", () => {
 
-            let playerId = socketPool.get(socket);
-            currentPlayers.delete(playerId);
-            socketPool.delete(socket);
+            let playerId = connectedSockets.get(socket);
 
-            console.info(`player gone [id=${playerId}]`);     
+            currentPlayers.delete(playerId);
+            connectedSockets.delete(socket);
+
+            console.info(`[GameRoom Channel ] player gone [id=${playerId}]`);     
             notifyUpdate = true; 
         });
 
-        socket.on("createGame", (game) => {
+        socket.on("createGame", ({width, height, maxPlayers}) => {
             //TODO message validation
 
-            let gameId = Math.floor(Math.random()*1000);
-            let game = new Game(gameId, game.width, game.height, game.maxPlayers);
-
+            const gameId = Math.floor(Math.random()*1000);
+            const game = new Game(gameId, width, height, maxPlayers);
             currentGames.set(gameId, game);   
-            createGameChannel(app, game); // Create game channel
+
             notifyUpdate = true;    
         });
 
         socket.on("joinGame", (game) => {
-            //Esta parte creo que sobra.
+            
             let currentGame = currentGames.get(game.id); 
-            let player = currentPlayers.filter(x => x.id === socketPool.get(socket));
+            let player = currentPlayers.keys.filter(x => x.id === connectedSockets.get(socket));
             currentGame.addPlayer(player); // TODO control de errores.-
+
+            gameChannelSocket.registerSocket(socketio, socket, game); // Create game channel
             notifyUpdate = true;    
 
-            console.info(`player ${player} joined game ${game.id} `);      
-
-            gameRoomNamespace.emit("playerJoinedGame", {});
+            console.info(`[GameRoom Channel ] player ${player} joined game ${game.id} `);      
         });
-
+ 
         setInterval(() => {
 
             if (notifyUpdate){               
-                gameRoomNamespace.emit('roomStateUpdate', {games : Array.from(currentGames.values()), players: Array.from(currentPlayers.values())});
+                socketio.to('gameRoom').emit('roomStateUpdate', {games : Array.from(currentGames.values()), players: Array.from(currentPlayers.values())});
                 notifyUpdate = false;
             }
             
            }, 3000);
-
     });
 }
 

@@ -26,8 +26,9 @@ const GameRoom = (props) => {
 
     }
 
-    const onGameJoinHandler = ({gameId, playerId}) => {
-        socket.emit('joinGame', { gameId: gameId });
+    const onGameJoinHandler = (gameId) => {
+        console.log(`received gameId onGameJoinHandler ${gameId}`);
+        updateState(prevState => ({ ...prevState, gamJoined: true, playingGameId: gameId }));
     }
 
     React.useEffect(() => {
@@ -39,31 +40,35 @@ const GameRoom = (props) => {
 
         socketClient.on("roomStateUpdate", data => {
             console.log("running roomStateUpdate", data);
-            updateState(prevState => ({ games: data.games, players: data.players }));
+            updateState(prevState => ({...prevState, games: data.games, players: data.players }));
         });
 
         socketClient.on("playerIdAssigned", data => {
 
-            console.log("Player id assigned.");
-            updateState(prevState => ({ ...prevState, playerId: data }));
+            console.log(`Player id assigned. ${data.playerId}`);
+            updateState(prevState => ({ ...prevState, playerId: data.playerId }));
+            console.log(roomState);
         });
 
         socketClient.on("gameJoined", data => {
+            console.log(`Game id joined. ${data}`);
             updateState(prevState => ({ ...prevState, gamJoined: true, playingGameId: data.gameId }));
         });
 
         return () => socketClient.disconnect();
     }, []);
 
-    return (
-        roomState.gamJoined ?
+    console.log(`gameJoined: ${roomState.gamJoined} playerId=${roomState.playerId} gameId=${roomState.gameId}` );
+
+    return ( 
+        !roomState.gamJoined ?
             <GameRoomView
                 onGameJoinHandler={onGameJoinHandler}
                 createGameHandler={createGameHandler}
                 games={roomState.games}
                 players={roomState.players}>
             </GameRoomView>
-            : <GamePanel gameId={roomState.playingGameId} playerId={roomState.playerId}></GamePanel>);
+            : <GamePanel gameId={roomState.playingGameId} playerId={roomState.playerId} socket={socket}></GamePanel>);
 }
 
 export default GameRoom;

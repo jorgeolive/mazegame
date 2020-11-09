@@ -1,8 +1,10 @@
+const { GameEngine } = require("../../game-engine");
 const { Maze } = require("./maze");
 
 class Game {
 
     constructor(id, width, height, maxPlayers) {
+
         this.id = id;
         this.width = width;
         this.height = height;
@@ -10,7 +12,14 @@ class Game {
         this.players = [];
         this.monsters = [];
         this.isStarted = false;
-        this.allPlayersJoined = false;
+
+        this.engine = new GameEngine();
+
+        this.gameState = {
+            isStarted: false,
+            mapServed : false,
+            playersReady : []
+        }
     }
 
     addPlayer(player) {
@@ -40,7 +49,7 @@ class Game {
             throw new Error("Waiting for players to join");
         }
 
-        this.players.forEach(plyr => plyr.setPosition(this.maze.getRandomCell()));
+        this.players.forEach(plyr => this.maze.playerMap.set(plyr, this.maze.getRandomCell()));
     }
 
     start(){

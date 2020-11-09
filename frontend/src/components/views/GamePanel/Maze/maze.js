@@ -1,7 +1,7 @@
 import React from 'react';
-import Cell from '../cell/cell';
+import Cell from '../Maze/cell/cell';
 
-const Maze = ({cells, adjancecyList, gameStarted}) =>{
+const Maze = (props) =>{
 
     const cellOrderFunction = (a,b) => {
         if(a.i > b.i) 
@@ -22,14 +22,13 @@ const Maze = ({cells, adjancecyList, gameStarted}) =>{
           backgroundColor: 'black'
       }
             
-    console.log(props.players);
     debugger;
 
     return (<div style={styles}>
-            {cells.
+            {props.cells.
             sort(cellOrderFunction).
             map(cell => { 
-              return <Cell cell={cell} key = {cell.id} id = {cell.id} players = {players.filter(x => x.position === cell.id)}></Cell>})}
+              return <Cell cell={cell} key = {cell.id} id = {cell.id} players = {props.players.filter(x => x.position === cell.id)}></Cell>})}
            </div>);
 }
 

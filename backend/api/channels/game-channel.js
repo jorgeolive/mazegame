@@ -1,50 +1,36 @@
 const { Player } = require('../model/Player');
-const { Game } = require('../model/game');
 
-module.exports.gameChannel = function (app, game) {
+module.exports.registerSocket = function (io, socket, game) {
 
-    const socketio = require('socket.io')(app, {
-        handlePreflightRequest: (req, res) => {
-            const headers = {
-                "Access-Control-Allow-Headers": "Content-Type, Authorization",
-                "Access-Control-Allow-Origin": req.headers.origin, //or the specific origin you want to give access to,
-                "Access-Control-Allow-Credentials": true
-            };
-            res.writeHead(200, headers);
-            res.end();
+    const gameObserver  = {
+        next: function(next) {
+          io.to(`game${game.id}`).emit(next);
+        },
+        error: function(error) {
+          console.log(error);
+        },
+        complete: function() {
+          console.log("done");
         }
-    });
+      };
 
-    const socketPool = new Map();
-    
-    const gameState = {
-        isStarted: false,
-        mapServed : false,
-        allPlayersJoined : false,
-        playersReady : []
-    }
-
-    const gameSpace = socketio.of(`/gameid/${game.id}`);
-
-    gameSpace.on('connection', function (socket) {
-
-        const interval = setInterval(() => {
-
+        /*const interval = setInterval(() => {
+            console.log('[Game Channel ] connection request');
             if (game.Started) {
                
             }
 
-        }, 3000);
+        }, 3000);*/
 
         socket.on("disconnect", () => {
 
             game.started = false;
             clearInterval(interval);
 
-            console.info(`player gone [id=${playerId}]`);
+            console.info(`[Game Channel ]player gone [id=${playerId}]`);
 
-            gameSpace.emit('gameEnded', {});
-            gameSpace.close();
+            io.to(`game${game.id}`).emit('gameEnded', {});
+            io.to(`game${game.id}`).close();
 
         });
 
@@ -54,17 +40,20 @@ module.exports.gameChannel = function (app, game) {
             gameState.playersReady.push(payload.playerId); 
 
           if(gameState.playersReady.length === game.players.length){
-            gameState.isStarted = true;
+
             game.start();
+            gameEngine.playerMovements$.subscribe(gameObserver);
 
-            gameSpace.emit('startingGame', {mazeData : {players : game.players}});
+            io.to(`game${game.id}`).emit('startingGame', {mazeData : {players : game.players}});
+            gameState.isStarted = true;
           }
-
         });
 
         socket.on('playerJoined', (player) => {
+          console.log("[Gam Channel ] playerJoined");
+
             if (game.allPlayersJoined()) {
-                emit('error', { error: "Can't join this game, is full." });
+              socket.emit('error', { error: "Can't join this game, is full." });
             } else {
 
                 const player = new Player(player.playerNumber, player.playerName);               
@@ -78,7 +67,7 @@ module.exports.gameChannel = function (app, game) {
                     game.init();
                     
                     console.log("serving maze!");
-                    socket.emit('gameData',
+                    io.to(`game${game.id}`).emit('gameData',
                         {
                             mazeData: {
                                 adjancecyList: Object.fromEntries(game.maze.adjacencyList),
@@ -92,5 +81,12 @@ module.exports.gameChannel = function (app, game) {
                 }
             }
         });
-    });
+
+        socket.on('newMovement', ({playerId, cellId}) => {
+            if(!gameState.isStarted){
+              socket.emit('invalidAction');
+            } else {
+              game.engine.pushMovement(playerId, cellId);
+            }
+        }); 
 }

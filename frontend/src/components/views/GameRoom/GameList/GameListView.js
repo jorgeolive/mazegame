@@ -17,7 +17,7 @@ const GameListView = (props) => {
         <tbody>
             {props.games != undefined && props.games.length > 0 ?
                 props.games.map(game => {
-                    console.log(game);
+                    console.log(game.id);
                     return (
                         <tr>
                             <td>{game.id}</td>
@@ -25,7 +25,7 @@ const GameListView = (props) => {
                             <td>{game.width}</td>
                             <td>{game.players.length}</td>
                             <td>{game.isStarted}</td>
-                            <td><button onClick={(event) => props.onGameJoinHandler(game.id)}>join!</button></td>
+                            <td><button onClick={(event) => {console.log("clickec"+game.id); props.onGameJoinHandler(game.id);}}>join!</button></td>
                         </tr>);
                 })
                 : null}

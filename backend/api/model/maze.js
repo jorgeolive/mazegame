@@ -4,6 +4,8 @@ const { Cell } = require("../model/cell");
 class Maze {
 
     constructor(width, height) {
+
+        this.playerMap = new Map();
         this.adjacencyList = new Map();
         this.width = width;
         this.height = height;
@@ -62,13 +64,13 @@ class Maze {
         return this.adjacencyList.get(first).some(elem => elem == other);
     }
 
-    render(gridDiv) {
+    /*render(gridDiv) {
         for (let i = 0; i < height; i++) {
             for (let j = 0; j < width; j++) {
                 gridDiv.appendChild(this.cellMap.get(Cell.getId(i, j)).htmlElement);
             }
         }
-    }
+    }*/
 
     getCellById(i, j) {
         return this.cells.find(elem => elem.i == i && elem.j == j);
