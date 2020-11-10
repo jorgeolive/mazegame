@@ -1,5 +1,5 @@
 import React from 'react';
-import Cell from '../Maze/cell/cell';
+import Cell from '../Maze/cell/Cell';
 
 const Maze = (props) =>{
 
@@ -22,8 +22,6 @@ const Maze = (props) =>{
           backgroundColor: 'black'
       }
             
-    debugger;
-
     return (<div style={styles}>
             {props.cells.
             sort(cellOrderFunction).

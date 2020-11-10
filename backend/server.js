@@ -1,4 +1,4 @@
-let sockets = require('./api/channels/gameroom-channel');
+let sockets = require('./api/rooms/waiting-room');
 let express = require('express');
 let app = express();
 let bodyParser = require('body-parser');

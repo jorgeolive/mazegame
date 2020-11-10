@@ -1,7 +1,6 @@
 import React from 'react';
 
 const Player = (props) => {
-    debugger;
     const style = {
 
         width: '20px',

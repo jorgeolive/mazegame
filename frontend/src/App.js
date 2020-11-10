@@ -70,7 +70,6 @@ function App() {
   }
 
   let setNameHandler = (name) => {
-    debugger;
     if(name !== state.playerName)
       updateState((prevState) => ({playerName : name}));
   }

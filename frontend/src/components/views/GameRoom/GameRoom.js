@@ -3,7 +3,7 @@ import socketIOClient from "socket.io-client";
 import GameRoomView from './GameRoomView';
 import GamePanel from './../GamePanel/GamePanel'
 
-const ENDPOINT = "http://localhost:3000/game-room";
+const ENDPOINT = "http://localhost:3000";
 
 const GameRoom = (props) => {
 
