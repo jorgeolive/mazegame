@@ -75,14 +75,17 @@ module.exports.gameRoomChannel = function (app) {
             } else {
 
             }
-
-
         });
 
         setInterval(() => {
 
             if (notifyUpdate) {
-                socketio.to(gameRoomChannelSocketRoomId).emit('roomStateUpdate', { games: Array.from(currentGames.values()), players: Array.from(currentPlayers.values()) });
+                const anyGame = currentGames.size > 0;
+                socketio.to(gameRoomChannelSocketRoomId).emit('roomStateUpdate', { 
+                    games: currentGames.size > 0 ? 
+                    Array.from(currentGames.values()).map(x => {return {id: x.id, width: x.width, height: x.height, isStarted: x.isStarted, numberOfPlayers : x.players.length}}) :
+                    []
+                    , players: Array.from(currentPlayers.values())});
                 notifyUpdate = false;
             }
 

@@ -13,8 +13,6 @@ class Game {
         this.monsters = [];
         this.isStarted = false;
 
-        this.engine = new GameEngine();
-
         this.gameState = {
             isStarted: false,
             mapServed : false,
@@ -39,13 +37,22 @@ class Game {
     }
 
     init() {
+
         this.maze = new Maze(this.width, this.height);
+        this.engine = new GameEngine(this.maze);
 
         if (!this.allPlayersJoined) {
             throw new Error("Waiting for players to join");
         }
 
-        this.players.forEach(plyr => this.maze.playerMap.set(plyr, this.maze.getRandomCell()));
+        this.players.forEach(plyr => {
+
+            const cellId = this.maze.getRandomCell().id;
+
+            if(this.maze.playerMap.get(cellId).length === 0){
+                this.maze.playerMap.set(cellId , [...this.maze.playerMap.get(cellId), plyr]);
+            }
+        });
     }
 
     start(){

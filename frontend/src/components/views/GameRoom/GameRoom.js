@@ -27,7 +27,6 @@ const GameRoom = (props) => {
     }
 
     const onGameJoinHandler = (gameId) => {
-        console.log(`received gameId onGameJoinHandler ${gameId}`);
         updateState(prevState => ({ ...prevState, gamJoined: true, playingGameId: gameId }));
     }
 
@@ -39,26 +38,20 @@ const GameRoom = (props) => {
         socketClient.emit('newPlayerJoined', props.playerName);
 
         socketClient.on("roomStateUpdate", data => {
-            console.log("running roomStateUpdate", data);
             updateState(prevState => ({...prevState, games: data.games, players: data.players }));
         });
 
         socketClient.on("playerIdAssigned", data => {
 
-            console.log(`Player id assigned. ${data.playerId}`);
             updateState(prevState => ({ ...prevState, playerId: data.playerId }));
-            console.log(roomState);
         });
 
         socketClient.on("gameJoined", data => {
-            console.log(`Game id joined. ${data}`);
             updateState(prevState => ({ ...prevState, gamJoined: true, playingGameId: data.gameId }));
         });
 
         return () => socketClient.disconnect();
     }, []);
-
-    console.log(`gameJoined: ${roomState.gamJoined} playerId=${roomState.playerId} gameId=${roomState.gameId}` );
 
     return ( 
         !roomState.gamJoined ?

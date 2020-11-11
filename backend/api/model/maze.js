@@ -20,6 +20,7 @@ class Maze {
               return 0;
         } );
         this.createRandomLabyrinth();
+        this.cells.forEach(x => this.playerMap.set(x.id, []));
     }
 
     getNeighbours = (cell) => {
@@ -63,14 +64,6 @@ class Maze {
     areCellsConnected(first, other) {
         return this.adjacencyList.get(first).some(elem => elem == other);
     }
-
-    /*render(gridDiv) {
-        for (let i = 0; i < height; i++) {
-            for (let j = 0; j < width; j++) {
-                gridDiv.appendChild(this.cellMap.get(Cell.getId(i, j)).htmlElement);
-            }
-        }
-    }*/
 
     getCellById(i, j) {
         return this.cells.find(elem => elem.i == i && elem.j == j);

@@ -4,7 +4,6 @@ module.exports.registerSocket = function (io, socket, game) {
 
   const gameRoomId = `game${game.id}`;
 
-  
   /*const interval = setInterval(() => {
       console.log('[Game Channel ] connection request');
       if (game.Started) {
@@ -26,14 +25,17 @@ module.exports.registerSocket = function (io, socket, game) {
         mazeData: {
           adjancecyList: Object.fromEntries(game.maze.adjacencyList),
           cells: game.maze.cells,
-          players: game.players
+          players: game.players,
+          height: game.height,
+          width: game.width,
+          playerMap: Array.from(game.maze.playerMap.entries())
         }
       });
+      console.log("finished serving maze.");
 
   } else {
     socket.emit('waitingForOtherPlayers');
   }
-
 
   socket.on("disconnect", () => {
 
@@ -43,10 +45,12 @@ module.exports.registerSocket = function (io, socket, game) {
     console.info(`[Game Channel ]player gone`);
 
     io.to(gameRoomId).emit('gameEnded', {});
-    io.leave(gameRoomId);
+    socket.leave(gameRoomId);
   });
 
   socket.on('gameDataACK', (payload) => {
+
+    console.log('running game data ack.');
 
     if (game.gameState.playersReady.filter(x => x == payload.playerId).length == 0)
       game.gameState.playersReady.push(payload.playerId);
@@ -55,32 +59,21 @@ module.exports.registerSocket = function (io, socket, game) {
 
       game.start();
 
-      const gameObserver = {
-        next: function (next) {
-          console.log('Running next function');
-          io.to(gameRoomId).emit(next);
-        },
-        error: function (error) {
-          console.log(error);
-        },
-        complete: function () {
-          console.log("done");
-        }
-      };
-    
-      game.engine.playerMovements$.subscribe(gameObserver);
+      game.engine.playerMovements$.subscribe(x => {
+        io.to(gameRoomId).emit(x);
+      }, x_ => console.log(x_), () => console.log("completed"));
 
-      io.in(gameRoomId).emit('gameStarted', { });
+      io.in(gameRoomId).emit('gameStarted');
+
       game.gameState.isStarted = true;
+
+    } else {
+      console.log('not all players have submitted their ACK signal. Waiting..');
     }
   });
 
-  //TODO: No existe evento playerJoined, hay que sacar esto fuera del socket.on()
-  socket.on('playerJoined', (player) => {
-    console.log("[Gam Channel ] playerJoined");
-  });
-
   socket.on('newMovement', ({ playerId, cellId }) => {
+    console.log("logged new movement event");
     if (!gameState.isStarted) {
       socket.emit('invalidAction');
     } else {

@@ -3,6 +3,7 @@ import Cell from '../Maze/cell/Cell';
 
 const Maze = (props) =>{
 
+   //TODO no tiene sentido hacer el sort todas las veces...
     const cellOrderFunction = (a,b) => {
         if(a.i > b.i) 
            return 1;
@@ -22,11 +23,13 @@ const Maze = (props) =>{
           backgroundColor: 'black'
       }
             
+      console.log("Entries", Array.from(props.playerMap.entries()));
     return (<div style={styles}>
             {props.cells.
             sort(cellOrderFunction).
             map(cell => { 
-              return <Cell cell={cell} key = {cell.id} id = {cell.id} players = {props.players.filter(x => x.position === cell.id)}></Cell>})}
+              const players = props.playerMap.get(cell.id);
+              return <Cell cell={cell} key = {cell.id} id = {cell.id} players = {players == null ? [] : players}></Cell>})}
            </div>);
 }
 

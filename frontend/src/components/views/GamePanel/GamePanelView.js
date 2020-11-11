@@ -16,7 +16,7 @@ const GamePanelView = (props) => {
     return (
         <div style={styles}>
           <div style={flexItemStyle}>
-            <Maze cells={state.labyrinth} players = {state.players} width={20} height={20} ></Maze></div>
+            <Maze cells={state.labyrinth} players = {state.players} width={props.width} height={props.height} ></Maze></div>
           <div style={flexItemStyle}><GameStart startGameHandler={placePlayer}></GameStart></div>
         </div>
     );
