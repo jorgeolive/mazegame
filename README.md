@@ -8,4 +8,6 @@ It plays with several concepts, such as:
 - Optimized shortest path finding algorythms for the monsters.
 - Collision detection
 
+It's heavily based on socket.io library, which is super cool btw.
+
 
