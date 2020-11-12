@@ -30,13 +30,11 @@ class GameEngine {
                 break;
         }
 
-        if (position && targetCell) {
-            if (this.maze.areCellsConnected(position, targetCell.id)) {
-       
-                this.maze.playerMap.delete(player);
-                this.maze.playerMap.set(player, targetCell.id);
-                this.playerMovements$.next({ playerMap: Array.from(this.maze.playerMap.entries()) });              
-            }
+        if (position && targetCell && this.maze.areCellsConnected(position, targetCell.id)) {
+
+            this.maze.playerMap.delete(player);
+            this.maze.playerMap.set(player, targetCell.id);
+            this.playerMovements$.next({ playerMap: Array.from(this.maze.playerMap.entries()) });
         }
     }
 }
