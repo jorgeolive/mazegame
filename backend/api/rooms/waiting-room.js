@@ -49,7 +49,6 @@ module.exports.gameRoomChannel = function (app) {
         });
 
         socket.on("createGame", ({ width, height, maxPlayers }) => {
-            //TODO message validation
 
             const gameId = Math.floor(Math.random() * 1000);
             const game = new Game(gameId, width, height, maxPlayers);

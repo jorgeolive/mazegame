@@ -11,16 +11,15 @@ class Maze {
         this.height = height;
         this.cellMap = this.generateCells();
         this.cells = [...this.cellMap].map(x => x[1]).sort((a,b) => {
-            if (a.id > b.id) {
-                return 1;
-              }
-              if (a.id < b.id) {
-                return -1;
-              }
-              return 0;
-        } );
+            if(a.i > b.i) 
+               return 1;
+            if(a.i < b.i)
+               return -1;
+            if(a.j > b.j)
+               return 1;
+            return -1;
+          } );
         this.createRandomLabyrinth();
-        this.cells.forEach(x => this.playerMap.set(x.id, []));
     }
 
     getNeighbours = (cell) => {
@@ -133,37 +132,23 @@ class Maze {
     
         if (node.j == secondaryNode.j - 1) {
             node.hasRightWall = false;
-           // actionStack.push(function () { node.removeRightWall() });
-    
             secondaryNode.hasLeftWall = false;
-           // actionStack.push(function () { secondaryNode.removeLeftWall() });
         }
     
-        if (node.j - 1 == secondaryNode.j) {
-    
+        if (node.j - 1 == secondaryNode.j) {  
             node.hasLeftWall = false;
-            //actionStack.push(function () { node.removeLeftWall() });
-    
             secondaryNode.hasRightWall = false;
-            //actionStack.push(function () { secondaryNode.removeRightWall() });
         }
     
-        if (node.i == secondaryNode.i - 1) {
-    
-            node.hasBottomWall = false;
-            //actionStack.push(function () { node.removeBottomWall() });
-    
+        if (node.i == secondaryNode.i - 1) {  
+            node.hasBottomWall = false;   
             secondaryNode.hasTopWall = false;
-          //  actionStack.push(function () { secondaryNode.removeTopWall() });
         }
     
         if (node.i - 1 == secondaryNode.i) {
     
             node.hasTopWall = false;
-            //actionStack.push(function () { node.removeTopWall() });
-    
             secondaryNode.hasBottomWall = false;
-          //  actionStack.push(function () { secondaryNode.removeBottomWall() });
         }
     } 
 }

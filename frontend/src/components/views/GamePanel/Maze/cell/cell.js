@@ -4,7 +4,6 @@ import './cell.css';
 
 const Cell = (props) => {
 
-    
     let classes = 'cell';
 
     if(props.cell.hasTopWall) classes += ' topwall';

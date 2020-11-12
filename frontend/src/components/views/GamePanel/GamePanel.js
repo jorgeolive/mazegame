@@ -16,24 +16,39 @@ const GamePanel = React.memo(({ gameId, playerId, socket }) => {
         gotMap: true, adjancecyList: data.mazeData.adjancecyList, cells: data.mazeData.cells,
         players: data.mazeData.players, height: data.mazeData.height, width: data.mazeData.width,
         playerMap: new Map(data.mazeData.playerMap) }));
-      debugger;
       socket.emit("gameDataACK", { playerId: playerId });
     });
 
     socket.on("gameStateUpdated",
-      data => updateGameState(prevState => ({ ...prevState, players: data.mazeData.players, playerMap : new Map(data.PlayerMap) })));
+      data => {
+        debugger;
+        updateGameState(prevState => ({ ...prevState, playerMap : new Map(data.playerMap) }));
+      } );
 
     socket.on("gameStarted",
-      data => updateGameState(prevState => ({ ...prevState, gameStarted: true })));
+      data => {
+        updateGameState(prevState => ({ ...prevState, gameStarted: true }));
 
-    return () => socket.disconnect();
+        document.addEventListener('keydown', e => {
+          e.preventDefault();
+          const key = e.key;
+          switch (key) {
+              case "ArrowLeft":
+              case "ArrowRight":
+              case "ArrowUp":
+              case "ArrowDown":
+                  socketState.emit('newMovement', { playerId: playerId, direction: key });
+                  break;
+              default:
+                  break;
+          }
+        });
+    });
+
+    return () => {
+       socket.disconnect();
+       document.removeEventListener('keydown');}
   }, []);
-
-
-  const movementHandler = (newPosition) => {
-    if(gameState.gameStarted)
-      socketState.emit('newMovement', { playerId: playerId, cellId: newPosition });
-  }
 
   const styles = {
     display: 'flex',
@@ -50,7 +65,7 @@ const GamePanel = React.memo(({ gameId, playerId, socket }) => {
       <div style={flexItemStyle}>
         <Maze cells={gameState.cells} players={gameState.players} 
               adjancecyList={gameState.adjancecyList} 
-              movementHandler={movementHandler} width={gameState.width} height={gameState.height}
+              width={gameState.width} height={gameState.height}
               playerMap={gameState.playerMap}></Maze></div>
     </div> :
     <div>Waiting for other players...</div>

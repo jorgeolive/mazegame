@@ -60,7 +60,7 @@ module.exports.registerSocket = function (io, socket, game) {
       game.start();
 
       game.engine.playerMovements$.subscribe(x => {
-        io.to(gameRoomId).emit(x);
+        io.to(gameRoomId).emit('gameStateUpdated', x);
       }, x_ => console.log(x_), () => console.log("completed"));
 
       io.in(gameRoomId).emit('gameStarted');
@@ -72,13 +72,12 @@ module.exports.registerSocket = function (io, socket, game) {
     }
   });
 
-  socket.on('newMovement', ({ playerId, cellId }) => {
+  socket.on('newMovement', ({ playerId, direction }) => {
     console.log("logged new movement event");
-    if (!gameState.isStarted) {
+    if (!game.gameState.isStarted) {
       socket.emit('invalidAction');
     } else {
-      game.engine.pushMovement(playerId, cellId);
+      game.engine.pushMovement(playerId, direction);
     }
   });
-
 }

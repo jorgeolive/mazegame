@@ -46,12 +46,8 @@ class Game {
         }
 
         this.players.forEach(plyr => {
-
-            const cellId = this.maze.getRandomCell().id;
-
-            if(this.maze.playerMap.get(cellId).length === 0){
-                this.maze.playerMap.set(cellId , [...this.maze.playerMap.get(cellId), plyr]);
-            }
+          const cellId = this.maze.getRandomCell().id;
+          this.maze.playerMap.set(plyr.id, cellId);
         });
     }
 
