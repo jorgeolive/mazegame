@@ -21,5 +21,10 @@ Features to add eventually:
 -Monsters
 
 
+#How to run
 
+on frontend folder, #npm start.
+on backend folder, #npm start
+
+open two different browser screens because as of now there are two players harcoded.
 
