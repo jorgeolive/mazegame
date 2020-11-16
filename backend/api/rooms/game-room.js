@@ -28,7 +28,8 @@ module.exports.registerSocket = function (io, socket, game) {
           players: game.players,
           height: game.height,
           width: game.width,
-          playerMap: Array.from(game.maze.playerMap.entries())
+          playerMap: Array.from(game.maze.playerMap.entries()),
+          monsterMap: Array.from(game.maze.playerMap.entries())
         }
       });
       console.log("finished serving maze.");
@@ -59,7 +60,7 @@ module.exports.registerSocket = function (io, socket, game) {
 
       game.start();
 
-      game.engine.playerMovements$.subscribe(x => {
+      game.movements$.subscribe(x => {
         io.to(gameRoomId).emit('gameStateUpdated', x);
       }, x_ => console.log(x_), () => console.log("completed"));
 
@@ -77,7 +78,7 @@ module.exports.registerSocket = function (io, socket, game) {
     if (!game.gameState.isStarted) {
       socket.emit('invalidAction');
     } else {
-      game.engine.pushMovement(playerId, direction);
+      game.pushMovement(playerId, direction);
     }
   });
 }

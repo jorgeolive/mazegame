@@ -5,37 +5,50 @@ class GameEngine {
 
     constructor(maze) {
         this.maze = maze;
-        this.playerMovements$ = new Rx.Subject();
-        //this.monsterMovements$ = new Observable();
     }
 
-    pushMovement = (player, direction) => {
-
-        const position = this.maze.playerMap.get(player);
-        const currentCell = this.maze.cellMap.get(position);
-        let targetCell;
-
-        switch (direction) {
-            case "ArrowLeft":
-                targetCell = this.maze.cellMap.get(Cell.Cell.getId(currentCell.i, currentCell.j - 1));
-                break;
-            case "ArrowRight":
-                targetCell = this.maze.cellMap.get(Cell.Cell.getId(currentCell.i, currentCell.j + 1));
-                break;
-            case "ArrowUp":
-                targetCell = this.maze.cellMap.get(Cell.Cell.getId(currentCell.i - 1, currentCell.j));
-                break;
-            case "ArrowDown":
-                targetCell = this.maze.cellMap.get(Cell.Cell.getId(currentCell.i + 1, currentCell.j));
-                break;
+    buildPathMap = () => {
+     //To consider if it's worth it to run it before game starts.
+    }
+    
+    getShortestPathToBFS = (from, to) => {
+        var visitedMap = [];
+        visitedMap.push(from);
+        var queue = [];
+        var fromMap = new Map();
+        let found = false;
+        let path = [];
+    
+        queue.push(from);
+    
+        while (queue.length != 0 && !found) {
+            let currentNode = queue.shift();
+            let adjacentNodes = this.maze.adjacencyList.get(currentNode);
+    
+            adjacentNodes.forEach(element => {
+                if (!visitedMap.includes(element)) {
+                    visitedMap.push(element);
+    
+                    fromMap.set(element, currentNode);
+                    queue.push(element);
+                    if (element == to) {
+                        found = true;
+                    }
+                }
+            });
+    
+    
+            if (found) {
+                let previous = fromMap.get(to);
+    
+                while (previous != undefined) {
+                    path.push(previous);
+                    previous = fromMap.get(previous);
+                }
+            }
         }
-
-        if (position && targetCell && this.maze.areCellsConnected(position, targetCell.id)) {
-
-            this.maze.playerMap.delete(player);
-            this.maze.playerMap.set(player, targetCell.id);
-            this.playerMovements$.next({ playerMap: Array.from(this.maze.playerMap.entries()) });
-        }
+    
+        return path.reverse();
     }
 }
 

@@ -24,6 +24,7 @@ const Maze = (props) => {
    }
 
    const playersByCell = Array.from(props.playerMap.entries());
+   const monstersByCell = Array.from(props.monsterMap.entries());
 
    const getPlayers = (playersByCell, cellId) => {
 
@@ -43,8 +44,10 @@ const Maze = (props) => {
    return (<div style={styles}>
       {props.cells.
          map(cell => {
-            const players = getPlayers(playersByCell, cell.id);
-            return <Cell cell={cell} key={cell.id} id={cell.id} players={players}></Cell>
+            //const players = getPlayers(playersByCell, cell.id);
+            return <Cell cell={cell} key={cell.id} id={cell.id} 
+            players={getPlayers(playersByCell, cell.id)} 
+            monsters={getPlayers(monstersByCell, cell.id)}></Cell>
          })}
    </div>);
 }

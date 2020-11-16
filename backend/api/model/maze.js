@@ -6,6 +6,7 @@ class Maze {
     constructor(width, height) {
 
         this.playerMap = new Map();
+        this.monsterMap = new Map();
         this.adjacencyList = new Map();
         this.width = width;
         this.height = height;

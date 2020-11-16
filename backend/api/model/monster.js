@@ -1,9 +1,9 @@
 class Monster {
-    constructor(positionCell) { 
-        this.position = positionCell;
+    constructor(id) { 
+        this.id = id;
      }
+}
 
-     moveTo(cell){
-         this.position = cell;
-     }
+module.exports = {
+    Monster: Monster
 }

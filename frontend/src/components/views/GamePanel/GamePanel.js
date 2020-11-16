@@ -15,14 +15,16 @@ const GamePanel = React.memo(({ gameId, playerId, socket }) => {
         ...prevState, 
         gotMap: true, adjancecyList: data.mazeData.adjancecyList, cells: data.mazeData.cells,
         players: data.mazeData.players, height: data.mazeData.height, width: data.mazeData.width,
-        playerMap: new Map(data.mazeData.playerMap) }));
+        playerMap: new Map(data.mazeData.playerMap),
+        monsterMap : new Map(data.mazeData.monsterMap)
+       }));
       socket.emit("gameDataACK", { playerId: playerId });
     });
 
     socket.on("gameStateUpdated",
       data => {
         debugger;
-        updateGameState(prevState => ({ ...prevState, playerMap : new Map(data.playerMap) }));
+        updateGameState(prevState => ({ ...prevState, playerMap : new Map(data.playerMap), monsterMap : new Map(data.monsterMap) }));
       } );
 
     socket.on("gameStarted",
@@ -66,7 +68,8 @@ const GamePanel = React.memo(({ gameId, playerId, socket }) => {
         <Maze cells={gameState.cells} players={gameState.players} 
               adjancecyList={gameState.adjancecyList} 
               width={gameState.width} height={gameState.height}
-              playerMap={gameState.playerMap}></Maze></div>
+              playerMap={gameState.playerMap}
+              monsterMap={gameState.monsterMap}></Maze></div>
     </div> :
     <div>Waiting for other players...</div>
   );
