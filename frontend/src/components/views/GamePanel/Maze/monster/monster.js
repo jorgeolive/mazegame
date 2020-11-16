@@ -11,6 +11,6 @@ const Monster = (props) => {
         cursor: 'move'
     };
 
-    return <div style={style}></div>
+    return <div style={style}>Y</div>
 }
 export default Monster;

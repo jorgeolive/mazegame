@@ -94,15 +94,15 @@ class Game {
                             minPath = path.length;
                             nearestPlayer = plyr;
                         }
-                    }
 
-                    this.maze.monsterMap.delete(monster.id);
-                    this.maze.monsterMap.set(monster.id, pathMap.get(nearestPlayer.id)[0]);
-
-                    this.movements$.next({
-                        playerMap: Array.from(this.maze.playerMap.entries()),
-                        monsterMap: Array.from(this.maze.monsterMap.entries())
-                    });
+                        this.maze.monsterMap.delete(monster.id);
+                        this.maze.monsterMap.set(monster.id, pathMap.get(nearestPlayer.id)[0]);
+    
+                        this.movements$.next({
+                            playerMap: Array.from(this.maze.playerMap.entries()),
+                            monsterMap: Array.from(this.maze.monsterMap.entries())
+                        });
+                    }         
                 }));
         }
             , 5000);

@@ -39,15 +39,31 @@ const Maze = (props) => {
       });
 
       return players;
-      }
+   }
    
+   const getMonsters = (playersByCell, cellId) => {
+//TODO Review
+      const players = [];
+      const ids = playersByCell.filter(x => x[1] === cellId);
+      debugger;
+
+      ids.forEach(x => {
+         const results = playersByCell.filter(y => y.id === x[0]);
+         if (results.length > 0) {
+            players.push(results[0]);
+         }
+      });
+
+      return players;
+   }
+
    return (<div style={styles}>
       {props.cells.
          map(cell => {
             //const players = getPlayers(playersByCell, cell.id);
             return <Cell cell={cell} key={cell.id} id={cell.id} 
             players={getPlayers(playersByCell, cell.id)} 
-            monsters={getPlayers(monstersByCell, cell.id)}></Cell>
+            monsters={getMonsters(monstersByCell, cell.id)}></Cell>
          })}
    </div>);
 }

@@ -4,7 +4,7 @@ import Maze from './Maze/maze';
 const GamePanel = React.memo(({ gameId, playerId, socket }) => {
   console.log(`game id ${gameId}`);
   const [socketState, updateSocket] = React.useState(socket);
-  const [gameState, updateGameState] = React.useState({ gotMap: false, gameStarted: false, adjancecyList: [], cells: [], players: [], gameId: gameId, playerId: playerId, width: 20, height: 20, playerMap: null });
+  const [gameState, updateGameState] = React.useState({ gotMap: false, gameStarted: false, adjancecyList: [], cells: [], players: [], gameId: gameId, playerId: playerId, width: 20, height: 20, playerMap: null, monsterMap: null });
 
   React.useEffect(() => {
 
