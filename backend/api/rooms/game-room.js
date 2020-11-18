@@ -29,7 +29,7 @@ module.exports.registerSocket = function (io, socket, game) {
           height: game.height,
           width: game.width,
           playerMap: Array.from(game.maze.playerMap.entries()),
-          monsterMap: Array.from(game.maze.playerMap.entries())
+          monsterMap: Array.from(game.maze.monsterMap.entries())
         }
       });
       console.log("finished serving maze.");
@@ -58,6 +58,8 @@ module.exports.registerSocket = function (io, socket, game) {
 
     if (game.gameState.playersReady.length === game.players.length) {
 
+      console.log("all players joined and ack'ed their data. starting game...");
+      
       game.start();
 
       game.movements$.subscribe(x => {

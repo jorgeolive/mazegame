@@ -41,20 +41,23 @@ const Maze = (props) => {
       return players;
    }
    
-   const getMonsters = (playersByCell, cellId) => {
-//TODO Review
-      const players = [];
-      const ids = playersByCell.filter(x => x[1] === cellId);
-      debugger;
+   const getMonsters = (monsters, cellId) => {
+
+      console.log("running get monsters");
+      console.log(monsters);
+      console.log(cellId);
+
+      const monsters_ = [];
+      const ids = monsters.filter(x => x[1] === cellId);
 
       ids.forEach(x => {
-         const results = playersByCell.filter(y => y.id === x[0]);
-         if (results.length > 0) {
-            players.push(results[0]);
-         }
+            monsters_.push(ids[0]);       
       });
 
-      return players;
+      if(monsters_.length > 0)
+        console.log("found monsters for cell ", cellId);
+
+      return monsters_;
    }
 
    return (<div style={styles}>

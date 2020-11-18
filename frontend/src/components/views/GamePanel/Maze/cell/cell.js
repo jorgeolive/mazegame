@@ -20,7 +20,7 @@ const Cell = (props) => {
 
     return <div className={classes}>
         {props.players.length > 0 ? props.players.map(player => <Player color={player.colorCode}></Player>) : null }
-        {props.monsters.length > 0 ? props.monsters.map(player => <Monster></Monster>) : null }
+        {props.monsters.length > 0 ? props.monsters.map(() => <Monster></Monster>) : null }
 
            </div>;
 }

@@ -23,7 +23,6 @@ const GamePanel = React.memo(({ gameId, playerId, socket }) => {
 
     socket.on("gameStateUpdated",
       data => {
-        debugger;
         updateGameState(prevState => ({ ...prevState, playerMap : new Map(data.playerMap), monsterMap : new Map(data.monsterMap) }));
       } );
 
