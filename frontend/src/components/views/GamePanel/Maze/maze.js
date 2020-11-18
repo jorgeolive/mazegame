@@ -3,17 +3,6 @@ import Cell from '../Maze/cell/Cell';
 
 const Maze = (props) => {
 
-   //TODO no tiene sentido hacer el sort todas las veces...
-   /*const cellOrderFunction = (a,b) => {
-       if(a.i > b.i) 
-          return 1;
-       if(a.i < b.i)
-          return -1;
-       if(a.j > b.j)
-          return 1;
-       return -1;
-     };*/
-
    let styles = {
       width: props.width * 20 + 'px',
       height: props.height * 20 + 'px',
@@ -42,11 +31,6 @@ const Maze = (props) => {
    }
    
    const getMonsters = (monsters, cellId) => {
-
-      console.log("running get monsters");
-      console.log(monsters);
-      console.log(cellId);
-
       const monsters_ = [];
       const ids = monsters.filter(x => x[1] === cellId);
 
@@ -54,16 +38,12 @@ const Maze = (props) => {
             monsters_.push(ids[0]);       
       });
 
-      if(monsters_.length > 0)
-        console.log("found monsters for cell ", cellId);
-
       return monsters_;
    }
 
    return (<div style={styles}>
       {props.cells.
          map(cell => {
-            //const players = getPlayers(playersByCell, cell.id);
             return <Cell cell={cell} key={cell.id} id={cell.id} 
             players={getPlayers(playersByCell, cell.id)} 
             monsters={getMonsters(monstersByCell, cell.id)}></Cell>

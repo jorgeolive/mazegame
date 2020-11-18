@@ -19,6 +19,7 @@ module.exports.gameRoomChannel = function (app) {
     const connectedSockets = new Map();
     const currentPlayers = new Map();
     const currentGames = new Map();
+    
     let notifyUpdate = false;
 
     socketio.on('connection', function (socket) {
@@ -51,7 +52,8 @@ module.exports.gameRoomChannel = function (app) {
         socket.on("createGame", ({ width, height, maxPlayers }) => {
 
             const gameId = Math.floor(Math.random() * 1000);
-            const game = new Game(gameId, width, height, maxPlayers);
+            //HARDCODED MONSTERS
+            const game = new Game(gameId, width, height, maxPlayers, 2);
             currentGames.set(gameId, game);
 
             notifyUpdate = true;

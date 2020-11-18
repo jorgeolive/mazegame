@@ -3,6 +3,7 @@ const { Maze } = require("./maze");
 const Rx = require("rxjs");
 const { Monster } = require("./monster");
 const { Cell } = require("./cell");
+const { performance } = require('perf_hooks');
 
 class Game {
 
@@ -63,11 +64,58 @@ class Game {
             this.maze.playerMap.set(plyr.id, cellId);
         });
 
-        this.monsters = [new Monster(Math.floor(Math.random() * 10000)), new Monster(Math.floor(Math.random() * 10000))];
+        for (let i = 0; i < this.maxMonsters; i++)
+            this.monsters.push(new Monster(Math.floor(Math.random() * 10000)));
 
         this.monsters.forEach(monster => {
             const cellId = this.maze.getRandomCell().id;
             this.maze.monsterMap.set(monster.id, cellId);
+        });
+    }
+
+    moveMonsters = () => {
+
+        const pathMap = new Map();
+        let minPath = 999999999;
+        let nearestPlayer;
+        let monsterPlayerCollision = false;
+
+        this.monsters.forEach(monster => {
+
+            this.players.forEach(plyr => {
+
+                const monsterPosition = this.maze.monsterMap.get(monster.id);
+                const position = this.maze.playerMap.get(plyr.id);
+
+                monsterPlayerCollision = monsterPosition === position;
+
+                if (!monsterPlayerCollision) {
+                    const path = this.engine.getShortestPathToBFS(position, monsterPosition);
+
+                    pathMap.set(plyr.id, path);
+
+                    if (path.length < minPath) {
+                        minPath = path.length;
+                        nearestPlayer = plyr;
+                    }
+                }
+            });
+
+            if (!monsterPlayerCollision) {
+                const path = pathMap.get(nearestPlayer.id);
+
+                this.maze.monsterMap.delete(monster.id);
+                this.maze.monsterMap.set(monster.id, path[path.length - 1]);
+
+               
+            } else {
+                this.gameOver = true;
+            }
+        });
+
+        this.movements$.next({
+            playerMap: Array.from(this.maze.playerMap.entries()),
+            monsterMap: Array.from(this.maze.monsterMap.entries())
         });
     }
 
@@ -77,43 +125,12 @@ class Game {
             this.isStarted = true;
             this.interval = setInterval(() => {
 
-                const pathMap = new Map();
-                let minPath = 999999999;
-                let nearestPlayer;
+                var v1 = performance.now();
+                this.moveMonsters();
+                var v2 = performance.now();
+                console.log("monster IA cyle executed in  " + (v2 - v1) + " milliseconds");
 
-                this.monsters.forEach(monster => {
-
-                    this.players.forEach(plyr => {
-
-                        const monsterPosition = this.maze.monsterMap.get(monster.id);
-                        const position = this.maze.playerMap.get(plyr.id);
-
-                        if (monsterPosition !== position) {
-                            const path = this.engine.getShortestPathToBFS(position, monsterPosition);
-
-                            pathMap.set(plyr.id, path);
-
-                            if (path.length < minPath) {
-                                minPath = path.length;
-                                nearestPlayer = plyr;
-                            }
-                        }
-                    });
-
-                    const path = pathMap.get(nearestPlayer.id);
-
-                    this.maze.monsterMap.delete(monster.id);
-                    this.maze.monsterMap.set(monster.id, path[path.length - 1]);
-
-                    console.log(`pushing monster movement, ${monster.id} to ${path[path.length - 1]}`);
-
-                    this.movements$.next({
-                        playerMap: Array.from(this.maze.playerMap.entries()),
-                        monsterMap: Array.from(this.maze.monsterMap.entries())
-                    });
-                }
-                );
-            } , 500);
+            }, 300);
         }
     }
 

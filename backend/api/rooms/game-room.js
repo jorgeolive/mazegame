@@ -40,11 +40,7 @@ module.exports.registerSocket = function (io, socket, game) {
 
   socket.on("disconnect", () => {
 
-    game.started = false;
-    //clearInterval(interval);
-
-    console.info(`[Game Channel ]player gone`);
-
+    game.stop();
     io.to(gameRoomId).emit('gameEnded', {});
     socket.leave(gameRoomId);
   });
@@ -59,7 +55,7 @@ module.exports.registerSocket = function (io, socket, game) {
     if (game.gameState.playersReady.length === game.players.length) {
 
       console.log("all players joined and ack'ed their data. starting game...");
-      
+
       game.start();
 
       game.movements$.subscribe(x => {
@@ -79,7 +75,7 @@ module.exports.registerSocket = function (io, socket, game) {
     console.log("logged new movement event");
     if (!game.gameState.isStarted) {
       socket.emit('invalidAction');
-    } else {
+    } else {    
       game.pushMovement(playerId, direction);
     }
   });
