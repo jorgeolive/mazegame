@@ -5,11 +5,12 @@ This is an WIP project about a CSS-based labyrinth multiplayer game, built over 
 It plays with several math-ish concepts, such as:
 
 - Randomized BFS graph generation algorythm, implemented at the backend.
-- Optimized shortest path finding algorythms for the monsters. TODO
+- BFS pathfinding finding algorythms for the monsters.
 
 There're some optimizations to be analyzed:
 *on the algorithm side, such as pre-compile the maze adjancecy list paths. 
-*on the Maze react component so it's not re-rendered every time a movement comes. Only cells should be.
+*Check if it's worth it to modify shortest path detection from BFS to A star algorithm
+*on the Maze react component, modify it so it's not re-rendered every time a movement comes. Only cells should be.
 
 On the tech side, obviously it's heavily based on socket.io library, which feels blazing fast.
 
