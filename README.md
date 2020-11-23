@@ -1,6 +1,6 @@
 # mazegame
 
-This is an WIP project about a CSS-based labyrinth multiplayer game, built over the MERN stack.
+This is an WIP project about a CSS-based labyrinth multiplayer game, built over the MERN stack. I would catalog this as some javascript algorithm/websocket experiment. 
 
 It plays with several math-ish concepts, such as:
 
@@ -8,6 +8,8 @@ It plays with several math-ish concepts, such as:
 - BFS pathfinding finding algorythms for the monsters.
 
 On the tech side:
+-Front is React 16, hooks everywhere!
+-Back is Node.js with Express.
 -it's heavily based on socket.io library, which feels blazing fast.
 
 
