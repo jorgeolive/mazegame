@@ -7,7 +7,10 @@ It plays with several math-ish concepts, such as:
 - Randomized BFS graph generation algorythm, implemented at the backend.
 - Optimized shortest path finding algorythms for the monsters. TODO
 
-There're some optimizations on the algorithm side, to convert array into maps to achieve O(1) perf. for the most part. 
+There're some optimizations to be analyzed:
+*on the algorithm side, such as pre-compile the maze adjancecy list paths. 
+*on the Maze react component so it's not re-rendered every time a movement comes. Only cells should be.
+
 On the tech side, obviously it's heavily based on socket.io library, which feels blazing fast.
 
 Features to add eventually:
@@ -16,7 +19,6 @@ Features to add eventually:
 - Score and game count down
 - placing random items to be collected
 - Collision detection
-- Monsters
 - At some point it would be cool to replace the whole css thing with p5.js, but, who has the time anyway? :)
 
 
