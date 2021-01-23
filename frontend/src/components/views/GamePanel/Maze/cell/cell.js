@@ -1,5 +1,5 @@
 import React from 'react';
-import Player from '../player/Player';
+import Player from '../player/player';
 import './cell.css';
 import Monster from '../monster/monster'
 

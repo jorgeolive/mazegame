@@ -17,7 +17,6 @@ class Game {
         this.players = [];
         this.monsters = [];
         this.isStarted = false;
-
         this.movements$ = new Rx.Subject();
 
         this.gameState = {
@@ -122,7 +121,7 @@ class Game {
     start() {
         if (!this.isStarted) {
 
-            this.isStarted = true;
+            this.gameState.isStarted = true;
             this.interval = setInterval(() => {
 
                 var v1 = performance.now();

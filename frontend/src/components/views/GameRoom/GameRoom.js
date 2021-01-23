@@ -1,18 +1,14 @@
 import React from 'react';
-import socketIOClient from "socket.io-client";
-import GameRoomView from './GameRoomView';
-import GamePanel from './../GamePanel/GamePanel'
+import GameRoomView from './gameRoomView';
+import GamePanel from '../GamePanel/gamePanel'
+import {SocketContext} from "../../../context/socket";
 
 const ENDPOINT = "http://localhost:3000";
 
 const GameRoom = (props) => {
 
-    const socketConf = {
-        "force new connection": true,
-        "reconnectionAttempts": "Infinity",
-        "timeout": 10000,
-        transports: ['websocket', 'polling', 'flashsocket']
-    };
+    //https://dev.to/bravemaster619/how-to-use-socket-io-client-correctly-in-react-app-o65
+    const socketClient = React.useContext(SocketContext);
 
     const [roomState, updateState] = React.useState({ games: [], players: [], gameJoined: false,  playingGameId: null, playerId: null });
     const [socket, updateSocket] = React.useState(null);
@@ -21,21 +17,17 @@ const GameRoom = (props) => {
         socket.emit('createGame', { width: gameConfiguration.width, height: gameConfiguration.height, maxPlayers: gameConfiguration.maxPlayers });
     }
 
-    const leaveGameHandler = () => {
+    //Mover a use callback??? No estoy seguro, revisar esto https://dmitripavlutin.com/dont-overuse-react-usecallback/
+    const leaveGameHandler = React.useCallback(() => {
         socket.emit('disconnect', { playerName: props.playerName });
 
-    }
+    });
 
-    const onGameJoinHandler = (gameId) => {
+    const onGameJoinHandler = React.useCallback((gameId) => {
         updateState(prevState => ({ ...prevState, gamJoined: true, playingGameId: gameId }));
-    }
+    });
 
-    React.useEffect(() => {
-        const socketClient = socketIOClient(ENDPOINT, socketConf);
-
-        updateSocket(socketClient);
-
-        socketClient.emit('newPlayerJoined', props.playerName);
+    const socketInitialization = () => {
 
         socketClient.on("roomStateUpdate", data => {
             updateState(prevState => ({...prevState, games: data.games, players: data.players }));
@@ -49,6 +41,15 @@ const GameRoom = (props) => {
         socketClient.on("gameJoined", data => {
             updateState(prevState => ({ ...prevState, gamJoined: true, playingGameId: data.gameId }));
         });
+
+        //Once the socket is configured store it?
+        updateSocket(socketClient);
+    };
+
+    React.useEffect(() => {
+
+        socketInitialization();    
+        socketClient.emit('newPlayerJoined', props.playerName);
 
         return () => socketClient.disconnect();
     }, []);

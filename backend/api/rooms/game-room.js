@@ -4,14 +4,6 @@ module.exports.registerSocket = function (io, socket, game) {
 
   const gameRoomId = `game${game.id}`;
 
-  /*const interval = setInterval(() => {
-      console.log('[Game Channel ] connection request');
-      if (game.Started) {
-         
-      }
-
-  }, 3000);*/
-
   socket.join(gameRoomId);
   socket.emit('playerJoinedSuccess', { gameId: game.id });
 
@@ -56,15 +48,13 @@ module.exports.registerSocket = function (io, socket, game) {
 
       console.log("all players joined and ack'ed their data. starting game...");
 
-      game.start();
-
       game.movements$.subscribe(x => {
         io.to(gameRoomId).emit('gameStateUpdated', x);
       }, x_ => console.log(x_), () => console.log("completed"));
+     
+      game.start();
 
       io.in(gameRoomId).emit('gameStarted');
-
-      game.gameState.isStarted = true;
 
     } else {
       console.log('not all players have submitted their ACK signal. Waiting..');

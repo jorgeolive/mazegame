@@ -1,5 +1,5 @@
 import React from 'react';
-import Cell from '../Maze/cell/Cell';
+import Cell from '../Maze/cell/cell';
 
 const Maze = (props) => {
 
