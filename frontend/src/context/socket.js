@@ -1,6 +1,7 @@
 import socketio from "socket.io-client";
 import React, { useEffect, useState } from 'react';
 
+console.log("Hi i am socket.js and I am executing");
 const socketConf = {
     "force new connection": true,
     "reconnectionAttempts": "Infinity",

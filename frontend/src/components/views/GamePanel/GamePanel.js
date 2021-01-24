@@ -1,15 +1,20 @@
 import React, { Profiler}  from 'react';
 import Maze from './Maze/maze';
+import {SocketContext} from "../../../context/socket";
 
-const GamePanel = React.memo(({ gameId, playerId, socket }) => {
+const GamePanel = React.memo(({ gameId, playerId }) => {
+
+  const socket = React.useContext(SocketContext);
+
   const [socketState, updateSocket] = React.useState(socket);
-  const [gameState, updateGameState] = React.useState({ gotMap: false, gameStarted: false, adjancecyList: [], cells: [], players: [], gameId: gameId, playerId: playerId, width: 20, height: 20, playerMap: null, monsterMap: null });
+  const [gameState, updateGameState] = React.useState({gotMap: false, gameStarted: false, adjancecyList: [], cells: [], players: [], gameId: gameId, playerId: playerId, width: 20, height: 20, playerMap: null, monsterMap: null });
+  const [gameOver, updateGameOver] = React.useState(false);
 
   React.useEffect(() => {
 
-    socket.emit('joinGame', { gameId });
+    socketState.emit('joinGame', { gameId });
 
-    socket.on("gameData", data => {
+    socketState.on("gameData", data => {
       updateGameState(prevState => ({
         ...prevState,
         gotMap: true, adjancecyList: data.mazeData.adjancecyList, cells: data.mazeData.cells,
@@ -17,15 +22,22 @@ const GamePanel = React.memo(({ gameId, playerId, socket }) => {
         playerMap: new Map(data.mazeData.playerMap),
         monsterMap: new Map(data.mazeData.monsterMap)
       }));
-      socket.emit("gameDataACK", { playerId: playerId });
+      socketState.emit("gameDataACK", { playerId: playerId });
     });
 
-    socket.on("gameStateUpdated",
+    socketState.on("gameStateUpdated",
       data => {
         updateGameState(prevState => ({ ...prevState, playerMap: new Map(data.playerMap), monsterMap: new Map(data.monsterMap) }));
       });
 
-    socket.on("gameStarted",
+      socketState.on("gameEvent",
+      data => {
+        if(data.eventType === "playerCaught" && playerId === data.playerId){
+          updateGameOver(true);
+        }
+      });
+
+      socketState.on("gameStarted",
       data => {
         updateGameState(prevState => ({ ...prevState, gameStarted: true }));
 
@@ -46,7 +58,7 @@ const GamePanel = React.memo(({ gameId, playerId, socket }) => {
       });
 
     return () => {
-      socket.disconnect();
+      socketState.disconnect();
       document.removeEventListener('keydown');
     }
   }, []);
@@ -68,6 +80,9 @@ const GamePanel = React.memo(({ gameId, playerId, socket }) => {
     console.log(`Start time: ${startTime}`);
     console.log(`Commit time: ${commitTime}`);
 }
+
+if(gameOver)
+  return <div>You got caught by one of those horrible CSS circles!</div>;
 
   return (gameState.gotMap && gameState.gameStarted ?
     <div style={styles}>

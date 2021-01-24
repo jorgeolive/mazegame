@@ -51,6 +51,10 @@ module.exports.registerSocket = function (io, socket, game) {
       game.movements$.subscribe(x => {
         io.to(gameRoomId).emit('gameStateUpdated', x);
       }, x_ => console.log(x_), () => console.log("completed"));
+
+      game.gameEvents$.subscribe(x => {
+        io.to(gameRoomId).emit('gameEvent', x);
+      }, x_ => console.log(x_), () => console.log(x));
      
       game.start();
 

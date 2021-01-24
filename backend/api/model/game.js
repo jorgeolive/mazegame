@@ -18,6 +18,7 @@ class Game {
         this.monsters = [];
         this.isStarted = false;
         this.movements$ = new Rx.Subject();
+        this.gameEvents$ = new Rx.Subject();
 
         this.gameState = {
             isStarted: false,
@@ -75,7 +76,7 @@ class Game {
     moveMonsters = () => {
 
         const pathMap = new Map();
-        let minPath = 999999999;
+        let minPath = Number.POSITIVE_INFINITY;
         let nearestPlayer;
         let monsterPlayerCollision = false;
 
@@ -97,6 +98,10 @@ class Game {
                         minPath = path.length;
                         nearestPlayer = plyr;
                     }
+                } else {
+                    this.maze.playerMap.delete(plyr.id);
+                    this.players = this.players.filter( x => x !== plyr);
+                    this.gameEvents$.next({eventType: "playerCaught", playerId : plyr.id});  
                 }
             });
 
@@ -133,9 +138,9 @@ class Game {
         }
     }
 
-    pushMovement = (player, direction) => {
+    pushMovement = (playerId, direction) => {
 
-        const position = this.maze.playerMap.get(player);
+        const position = this.maze.playerMap.get(playerId);
         const currentCell = this.maze.cellMap.get(position);
         let targetCell;
 
@@ -156,8 +161,8 @@ class Game {
 
         if (position && targetCell && this.maze.areCellsConnected(position, targetCell.id)) {
 
-            this.maze.playerMap.delete(player);
-            this.maze.playerMap.set(player, targetCell.id);
+            this.maze.playerMap.delete(playerId);
+            this.maze.playerMap.set(playerId, targetCell.id);
 
             this.movements$.next({
                 playerMap: Array.from(this.maze.playerMap.entries()),
