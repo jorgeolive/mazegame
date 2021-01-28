@@ -8,6 +8,7 @@ class Maze {
         this.playerMap = new Map();
         this.monsterMap = new Map();
         this.adjacencyList = new Map();
+        this.shortestPathMap = new Map(); // Map of maps
         this.width = width;
         this.height = height;
         this.cellMap = this.generateCells();

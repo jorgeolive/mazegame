@@ -49,11 +49,11 @@ module.exports.gameRoomChannel = function (app) {
             notifyUpdate = true;
         });
 
-        socket.on("createGame", ({ width, height, maxPlayers }) => {
+        socket.on("createGame", ({ width, height, maxPlayers, monsters }) => {
 
             const gameId = Math.floor(Math.random() * 1000);
             //HARDCODED MONSTERS
-            const game = new Game(gameId, width, height, maxPlayers, 2);
+            const game = new Game(gameId, width, height, maxPlayers, monsters);
             currentGames.set(gameId, game);
 
             notifyUpdate = true;
@@ -84,7 +84,7 @@ module.exports.gameRoomChannel = function (app) {
                 const anyGame = currentGames.size > 0;
                 socketio.to(gameRoomChannelSocketRoomId).emit('roomStateUpdate', { 
                     games: currentGames.size > 0 ? 
-                    Array.from(currentGames.values()).map(x => {return {id: x.id, width: x.width, height: x.height, isStarted: x.isStarted, numberOfPlayers : x.players.length}}) :
+                    Array.from(currentGames.values()).map(x => {return {id: x.id, width: x.width, height: x.height, isStarted: x.isStarted, numberOfPlayers : x.players.length, monsters : x.maxMonsters}}) :
                     []
                     , players: Array.from(currentPlayers.values())});
                 notifyUpdate = false;

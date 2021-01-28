@@ -71,6 +71,11 @@ class Game {
             const cellId = this.maze.getRandomCell().id;
             this.maze.monsterMap.set(monster.id, cellId);
         });
+
+        var v1 = performance.now();
+        this.engine.buildPathMap();
+        var v2 = performance.now();
+        console.log("Preprocessed maze shortest path in  " + (v2 - v1) + " milliseconds");
     }
 
     moveMonsters = () => {
@@ -90,7 +95,8 @@ class Game {
                 monsterPlayerCollision = monsterPosition === position;
 
                 if (!monsterPlayerCollision) {
-                    const path = this.engine.getShortestPathToBFS(position, monsterPosition);
+                    //const path = this.engine.getShortestPathToBFS(position, monsterPosition);
+                    const path = this.maze.shortestPathMap.get(position).get(monsterPosition);
 
                     pathMap.set(plyr.id, path);
 

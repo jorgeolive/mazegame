@@ -9,7 +9,8 @@ const GameListView = (props) => {
                 <th>Game Id</th>
                 <th>Maze Height</th>
                 <th>Maze Width</th>
-                <th>Players</th>
+                <th>Players</th>              
+                <th>Monsters</th>
                 <th>Is Started</th>
                 <th></th>
             </tr>
@@ -22,7 +23,8 @@ const GameListView = (props) => {
                             <td>{game.id}</td>
                             <td>{game.height}</td>
                             <td>{game.width}</td>
-                            <td>{game.numberOfPlayers}</td>
+                            <td>{game.numberOfPlayers}</td>                           
+                            <td>{game.monsters}</td>
                             <td>{game.isStarted}</td>
                             <td><button onClick={(event) => {props.onGameJoinHandler(game.id);}}>join!</button></td>
                         </tr>);

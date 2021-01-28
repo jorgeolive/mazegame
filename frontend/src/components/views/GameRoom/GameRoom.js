@@ -14,7 +14,7 @@ const GameRoom = (props) => {
     const [socket, updateSocket] = React.useState(null);
 
     const createGameHandler = (gameConfiguration) => {
-        socket.emit('createGame', { width: gameConfiguration.width, height: gameConfiguration.height, maxPlayers: gameConfiguration.maxPlayers });
+        socket.emit('createGame', { width: gameConfiguration.width, height: gameConfiguration.height, maxPlayers: gameConfiguration.maxPlayers, monsters: gameConfiguration.monsters });
     }
 
     //Mover a use callback??? No estoy seguro, revisar esto https://dmitripavlutin.com/dont-overuse-react-usecallback/
