@@ -17,8 +17,8 @@ app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-let mazeRoute = require('./api/routes/maze-route');
-mazeRoute(app);
+//let mazeRoute = require('./api/routes/maze-route');
+//mazeRoute(app);
 
 //let gameRoute = require('./api/routes/game-route');
 //gameRoute(app);

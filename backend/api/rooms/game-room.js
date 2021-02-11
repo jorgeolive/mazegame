@@ -1,34 +1,28 @@
-const { Player } = require('../model/Player');
-
 module.exports.registerSocket = function (io, socket, game) {
 
   const gameRoomId = `game${game.id}`;
-
   socket.join(gameRoomId);
   socket.emit('playerJoinedSuccess', { gameId: game.id });
 
-  if (game.allPlayersJoined && !game.gameState.mapServed) {
-
-    game.init();
-
-    console.log("serving maze!");
-    io.to(gameRoomId).emit('gameData',
-      {
-        mazeData: {
-          adjancecyList: Object.fromEntries(game.maze.adjacencyList),
-          cells: game.maze.cells,
-          players: game.players,
-          height: game.height,
-          width: game.width,
-          playerMap: Array.from(game.maze.playerMap.entries()),
-          monsterMap: Array.from(game.maze.monsterMap.entries())
-        }
-      });
+  //Smell
+  game.engine.engineEvents$.subscribe(x => {
+    if (x.eventType === "pathMapReady") {
+      console.log("serving maze!");
+      io.to(gameRoomId).emit('gameData',
+        {
+          mazeData: {
+            adjancecyList: Object.fromEntries(game.maze.adjacencyList),
+            cells: game.maze.cells,
+            players: game.players,
+            height: game.height,
+            width: game.width,
+            playerMap: Array.from(game.engine.playerMap.entries()),
+            monsterMap: Array.from(game.engine.monsterMap.entries())
+          }
+        });
       console.log("finished serving maze.");
-
-  } else {
-    socket.emit('waitingForOtherPlayers');
-  }
+    }
+  })
 
   socket.on("disconnect", () => {
 
@@ -55,7 +49,7 @@ module.exports.registerSocket = function (io, socket, game) {
       game.gameEvents$.subscribe(x => {
         io.to(gameRoomId).emit('gameEvent', x);
       }, x_ => console.log(x_), () => console.log(x));
-     
+
       game.start();
 
       io.in(gameRoomId).emit('gameStarted');
@@ -69,8 +63,14 @@ module.exports.registerSocket = function (io, socket, game) {
     console.log("logged new movement event");
     if (!game.gameState.isStarted) {
       socket.emit('invalidAction');
-    } else {    
+    } else {
       game.pushMovement(playerId, direction);
     }
   });
+
+  if (game.allPlayersJoined && !game.gameState.mapServed) {
+    game.init();
+  } else {
+    socket.emit('waitingForOtherPlayers');
+  }
 }
