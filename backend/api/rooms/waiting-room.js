@@ -83,6 +83,7 @@ module.exports.gameRoomChannel = function (app) {
             if (notifyUpdate) {
                 const anyGame = currentGames.size > 0;
                 socketio.to(gameRoomChannelSocketRoomId).emit('roomStateUpdate', { 
+                    
                     games: currentGames.size > 0 ? 
                     Array.from(currentGames.values()).map(x => {return {id: x.id, width: x.width, height: x.height, isStarted: x.isStarted, numberOfPlayers : x.players.length, monsters : x.maxMonsters}}) :
                     []
