@@ -10,6 +10,14 @@ class Player {
     //this.hasJoined = false;
   }
 
+  asSerializable = () => {
+    return {
+      id: this.id,
+      name: this.name,
+      colorCode : this.colorCode
+    }
+  }
+
   getRandomColor = () => {
     var letters = '0123456789ABCDEF';
     var color = '#';

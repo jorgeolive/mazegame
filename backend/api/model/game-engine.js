@@ -15,8 +15,12 @@ class GameEngine {
 
     buildPathMap = (maze) => {
 
+        console.log(`running game-engine.js buildPathMap`);
+
         return new Promise((resolve, reject) => {
 
+            //if debugging 
+            //const worker = new Worker('./backend/api/model/game-engine_worker.js', {
             const worker = new Worker('./api/model/game-engine_worker.js', {
                 workerData: {
                     cells: maze.cells,
@@ -26,13 +30,14 @@ class GameEngine {
 
             worker.on('message', (x) => {
                 console.log(`received pathmap from worker thread.`);
+                console.log(typeof x);
                 this.shortestPathMap = x;
                 resolve();
             });
         }); 
     }
 
-    moveOrAttackClosestPlayer = (monster, players) => {
+    moveOrAttackClosestPlayer = (players,monster) => {
 
         const pathMap = new Map();
         let minPath = Number.POSITIVE_INFINITY;
@@ -41,7 +46,6 @@ class GameEngine {
 
         players.filter(x => x.isAlive).forEach(plyr => {
 
-            this.moveOrAttackClosestPlayer(monster, players)
             const monsterPosition = this.monsterMap.get(monster.id);
             const position = this.playerMap.get(plyr.id);
 
@@ -50,6 +54,7 @@ class GameEngine {
             if (!monsterPlayerCollision) {
 
                 const path = this.shortestPathMap.get(position).get(monsterPosition);
+
                 pathMap.set(plyr.id, path);
 
                 if (path.length < minPath) {
@@ -67,17 +72,15 @@ class GameEngine {
 
             this.monsterMap.delete(monster.id);
             this.monsterMap.set(monster.id, path[path.length - 1]);
-
-
         } else {
             //this.gameOver = true;
         }
     }
 
-    runGameCycle = (monsters, players) => {
+    runGameCycle = (players, monsters) => {
 
         monsters.forEach(monster => {
-            this.moveOrAttackClosestPlayer(monster, players)
+            this.moveOrAttackClosestPlayer(players, monster )
 
         });
 

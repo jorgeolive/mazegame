@@ -80,7 +80,7 @@ class Game {
             this.engine.monsterMap.set(monster.id, cellId);
         });
 
-        this.engine.buildPathMap(this.maze).then(() => {});
+        return this.engine.buildPathMap(this.maze);
     }
 
     start() {
@@ -96,13 +96,13 @@ class Game {
                 var v2 = performance.now();
                 console.log("monster IA cyle executed in  " + (v2 - v1) + " milliseconds");
 
-                updateClients();
+                this.updatePlayers();
 
             }, 300);
         }
     }
 
-    updateClients = () => {
+    updatePlayers = () => {
 
         this.movements$.next({
             playerMap: Array.from(this.engine.playerMap.entries()),
@@ -114,7 +114,7 @@ class Game {
 
         //No estoy seguro que objeto deberia gestionar esta logica. Engine?
         const position = this.engine.playerMap.get(playerId);
-        const currentCell = this.engine.cellMap.get(position);
+        const currentCell = this.maze.cellMap.get(position);
         let targetCell;
 
         switch (direction) {
@@ -137,7 +137,7 @@ class Game {
             this.engine.playerMap.delete(playerId);
             this.engine.playerMap.set(playerId, targetCell.id);
 
-            updateClients();
+            this.updatePlayers();
         }
     }
 }

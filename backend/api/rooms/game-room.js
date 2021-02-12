@@ -4,26 +4,6 @@ module.exports.registerSocket = function (io, socket, game) {
   socket.join(gameRoomId);
   socket.emit('playerJoinedSuccess', { gameId: game.id });
 
-  //Smell
-  game.engine.engineEvents$.subscribe(x => {
-    if (x.eventType === "pathMapReady") {
-      console.log("serving maze!");
-      io.to(gameRoomId).emit('gameData',
-        {
-          mazeData: {
-            adjancecyList: Object.fromEntries(game.maze.adjacencyList),
-            cells: game.maze.cells,
-            players: game.players,
-            height: game.height,
-            width: game.width,
-            playerMap: Array.from(game.engine.playerMap.entries()),
-            monsterMap: Array.from(game.engine.monsterMap.entries())
-          }
-        });
-      console.log("finished serving maze.");
-    }
-  })
-
   socket.on("disconnect", () => {
 
     game.stop();
@@ -69,7 +49,28 @@ module.exports.registerSocket = function (io, socket, game) {
   });
 
   if (game.allPlayersJoined && !game.gameState.mapServed) {
-    game.init();
+
+    console.log("initializing maze.");
+
+    game.init().then( () => {
+
+      console.log("serving maze!");
+
+      io.to(gameRoomId).emit('gameData',
+        {
+          mazeData: {
+            adjancecyList: Object.fromEntries(game.maze.adjacencyList),
+            cells: game.maze.cells,
+            players: game.players.map( x => x.asSerializable()),
+            height: game.height,
+            width: game.width,
+            playerMap: Array.from(game.engine.playerMap.entries()),
+            monsterMap: Array.from(game.engine.monsterMap.entries())
+          }
+        });
+
+    }).
+    catch( err => console.log('initialization: ' + err));
   } else {
     socket.emit('waitingForOtherPlayers');
   }
