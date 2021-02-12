@@ -1,7 +1,7 @@
 class Monster {
-    constructor(id) { 
+    constructor(id) {
         this.id = id;
-     }
+    }
 }
 
 module.exports = {

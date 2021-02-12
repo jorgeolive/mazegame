@@ -81,12 +81,17 @@ module.exports.gameRoomChannel = function (app) {
         setInterval(() => {
 
             if (notifyUpdate) {
+                
+                console.log(`emiting update.`);
+
                 const anyGame = currentGames.size > 0;
-                socketio.to(gameRoomChannelSocketRoomId).emit('roomStateUpdate', { 
-                    games: currentGames.size > 0 ? 
-                    Array.from(currentGames.values()).map(x => {return {id: x.id, width: x.width, height: x.height, isStarted: x.isStarted, numberOfPlayers : x.players.length, monsters : x.maxMonsters}}) :
-                    []
-                    , players: Array.from(currentPlayers.values())});
+                socketio.to(gameRoomChannelSocketRoomId).emit('roomStateUpdate', 
+                    {               
+                        games: currentGames.size > 0 ? 
+                        Array.from(currentGames.values()).map(x => {return {id: x.id, width: x.width, height: x.height, isStarted: x.gameState.isStarted, numberOfPlayers : x.players.length, monsters : x.maxMonsters}}) :
+                        [],
+                        players: Array.from(currentPlayers.values()).map( x => x.asSerializable())
+                    });
                 notifyUpdate = false;
             }
 

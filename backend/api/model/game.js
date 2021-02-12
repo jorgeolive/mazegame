@@ -1,4 +1,4 @@
-const { GameEngine } = require("../../game-engine");
+const { GameEngine } = require("./game-engine");
 const { Maze } = require("./maze");
 const Rx = require("rxjs");
 const { Monster } = require("./monster");
@@ -6,6 +6,8 @@ const { Cell } = require("./cell");
 const { performance } = require('perf_hooks');
 
 class Game {
+
+    maze;
 
     constructor(id, width, height, maxPlayers, maxMonsters) {
 
@@ -16,9 +18,9 @@ class Game {
         this.maxMonsters = maxMonsters;
         this.players = [];
         this.monsters = [];
-        this.isStarted = false;
         this.movements$ = new Rx.Subject();
         this.gameEvents$ = new Rx.Subject();
+        this.engine = new GameEngine();
 
         this.gameState = {
             isStarted: false,
@@ -31,7 +33,7 @@ class Game {
 
         this.movements$.unsubscribe();
         clearInterval(this.interval);
-        this.isStarted = false;
+        this.gameState.isStarted = false;
     }
 
     addPlayer(player) {
@@ -51,9 +53,7 @@ class Game {
     }
 
     init() {
-
         this.maze = new Maze(this.width, this.height);
-        this.engine = new GameEngine(this.maze);
 
         if (!this.allPlayersJoined) {
             throw new Error("Waiting for players to join");
@@ -61,7 +61,15 @@ class Game {
 
         this.players.forEach(plyr => {
             const cellId = this.maze.getRandomCell().id;
-            this.maze.playerMap.set(plyr.id, cellId);
+            this.engine.playerMap.set(plyr.id, cellId);
+
+            plyr.playerEvents$.subscribe(x => {
+                this.gameEvents$.next(x);
+                if (x.eventType === "playerCaught") {
+                    plyr.playerEvents$.unsubscribe();
+                    console.log(`player ${plyr.id} is dead. Unsubscribed from it's event stream.`);
+                }
+            });
         });
 
         for (let i = 0; i < this.maxMonsters; i++)
@@ -69,84 +77,43 @@ class Game {
 
         this.monsters.forEach(monster => {
             const cellId = this.maze.getRandomCell().id;
-            this.maze.monsterMap.set(monster.id, cellId);
+            this.engine.monsterMap.set(monster.id, cellId);
         });
 
-        var v1 = performance.now();
-        this.engine.buildPathMap();
-        var v2 = performance.now();
-        console.log("Preprocessed maze shortest path in  " + (v2 - v1) + " milliseconds");
-    }
-
-    moveMonsters = () => {
-
-        const pathMap = new Map();
-        let minPath = Number.POSITIVE_INFINITY;
-        let nearestPlayer;
-        let monsterPlayerCollision = false;
-
-        this.monsters.forEach(monster => {
-
-            this.players.forEach(plyr => {
-
-                const monsterPosition = this.maze.monsterMap.get(monster.id);
-                const position = this.maze.playerMap.get(plyr.id);
-
-                monsterPlayerCollision = monsterPosition === position;
-
-                if (!monsterPlayerCollision) {
-                    //const path = this.engine.getShortestPathToBFS(position, monsterPosition);
-                    const path = this.maze.shortestPathMap.get(position).get(monsterPosition);
-
-                    pathMap.set(plyr.id, path);
-
-                    if (path.length < minPath) {
-                        minPath = path.length;
-                        nearestPlayer = plyr;
-                    }
-                } else {
-                    this.maze.playerMap.delete(plyr.id);
-                    this.players = this.players.filter( x => x !== plyr);
-                    this.gameEvents$.next({eventType: "playerCaught", playerId : plyr.id});  
-                }
-            });
-
-            if (!monsterPlayerCollision) {
-                const path = pathMap.get(nearestPlayer.id);
-
-                this.maze.monsterMap.delete(monster.id);
-                this.maze.monsterMap.set(monster.id, path[path.length - 1]);
-
-               
-            } else {
-                this.gameOver = true;
-            }
-        });
-
-        this.movements$.next({
-            playerMap: Array.from(this.maze.playerMap.entries()),
-            monsterMap: Array.from(this.maze.monsterMap.entries())
-        });
+        return this.engine.buildPathMap(this.maze);
     }
 
     start() {
         if (!this.isStarted) {
 
             this.gameState.isStarted = true;
+            //Move to engine
+
             this.interval = setInterval(() => {
 
                 var v1 = performance.now();
-                this.moveMonsters();
+                this.engine.runGameCycle(this.players, this.monsters);
                 var v2 = performance.now();
                 console.log("monster IA cyle executed in  " + (v2 - v1) + " milliseconds");
+
+                this.updatePlayers();
 
             }, 300);
         }
     }
 
+    updatePlayers = () => {
+
+        this.movements$.next({
+            playerMap: Array.from(this.engine.playerMap.entries()),
+            monsterMap: Array.from(this.engine.monsterMap.entries())
+        });
+    }
+
     pushMovement = (playerId, direction) => {
 
-        const position = this.maze.playerMap.get(playerId);
+        //No estoy seguro que objeto deberia gestionar esta logica. Engine?
+        const position = this.engine.playerMap.get(playerId);
         const currentCell = this.maze.cellMap.get(position);
         let targetCell;
 
@@ -167,13 +134,10 @@ class Game {
 
         if (position && targetCell && this.maze.areCellsConnected(position, targetCell.id)) {
 
-            this.maze.playerMap.delete(playerId);
-            this.maze.playerMap.set(playerId, targetCell.id);
+            this.engine.playerMap.delete(playerId);
+            this.engine.playerMap.set(playerId, targetCell.id);
 
-            this.movements$.next({
-                playerMap: Array.from(this.maze.playerMap.entries()),
-                monsterMap: Array.from(this.maze.monsterMap.entries())
-            });
+            this.updatePlayers();
         }
     }
 }

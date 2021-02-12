@@ -5,10 +5,9 @@ class Maze {
 
     constructor(width, height) {
 
-        this.playerMap = new Map();
-        this.monsterMap = new Map();
+        //this.playerMap = new Map();
+        //this.monsterMap = new Map();
         this.adjacencyList = new Map();
-        this.shortestPathMap = new Map(); // Map of maps
         this.width = width;
         this.height = height;
         this.cellMap = this.generateCells();
@@ -84,7 +83,6 @@ class Maze {
 
             if (!currentElement.visited) {
                 currentElement.visited = true;
-                //actionStack.push(function () { currentElement.markAsVisited() });
             }
 
             visitedCells.add(currentElement.id);
