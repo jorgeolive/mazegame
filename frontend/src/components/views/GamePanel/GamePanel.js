@@ -1,6 +1,7 @@
 import React, { Profiler}  from 'react';
 import Maze from './Maze/maze';
 import {SocketContext} from "../../../context/socket";
+import Waiting from '../Waiting/waiting';
 
 const GamePanel = React.memo(({ gameId, playerId }) => {
 
@@ -9,10 +10,13 @@ const GamePanel = React.memo(({ gameId, playerId }) => {
   const [socketState, updateSocket] = React.useState(socket);
   const [gameState, updateGameState] = React.useState({gotMap: false, gameStarted: false, adjancecyList: [], cells: [], players: [], gameId: gameId, playerId: playerId, width: 20, height: 20, playerMap: null, monsterMap: null });
   const [gameOver, updateGameOver] = React.useState(false);
+  const [allPlayersJoined, updateAllPlayersJoined] = React.useState(false);
 
   React.useEffect(() => {
 
     socketState.emit('joinGame', { gameId });
+
+    socketState.on("allPlayersJoined", x => updateAllPlayersJoined(true));
 
     socketState.on("gameData", data => {
       updateGameState(prevState => ({
@@ -97,7 +101,7 @@ if(gameOver)
         </Profiler>
       </div>
     </div> :
-    <div>Waiting for other players...</div>
+    <Waiting allPlayersJoined = {allPlayersJoined}></Waiting>
   );
 
 

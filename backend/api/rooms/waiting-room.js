@@ -52,7 +52,6 @@ module.exports.gameRoomChannel = function (app) {
         socket.on("createGame", ({ width, height, maxPlayers, monsters }) => {
 
             const gameId = Math.floor(Math.random() * 1000);
-            //HARDCODED MONSTERS
             const game = new Game(gameId, width, height, maxPlayers, monsters);
             currentGames.set(gameId, game);
 

@@ -1,12 +1,15 @@
 const {Worker,  isMainThread, parentPort, workerData} = require('worker_threads');
 
-const buildPathMap = (cells, adjancecyList) => {
+const buildPathMap = (cells, adjancecyList, parentPort) => {
         
     let shortestPathMap = new Map();
     console.log(`Running foreach in buildmap...`);
 
-    cells.forEach(x => {
+    const totalCells = cells.length;
+    let cycle = 0;
 
+    cells.forEach(x => {
+        
         let map = new Map();
 
         cells.forEach(y => {
@@ -14,7 +17,11 @@ const buildPathMap = (cells, adjancecyList) => {
         });
 
         shortestPathMap.set(x.id, map);
+
+        cycle++;
+        parentPort.postMessage({eventType: "progressStatus", progress: ((cycle/totalCells)*100).toFixed()});
     });
+    
     console.log(`End running buildPathMap...`);
 
     return shortestPathMap;
@@ -61,7 +68,7 @@ const getShortestPathToBFS = (from, to, adjancecyList) => {
 
 if(!isMainThread) {
  console.log(`running worker`);
- const pathMap = buildPathMap(workerData.cells, workerData.adjacencyList);
+ const pathMap = buildPathMap(workerData.cells, workerData.adjacencyList, parentPort);
 
  console.log(`finished building pathmap`);
  parentPort.postMessage(pathMap);

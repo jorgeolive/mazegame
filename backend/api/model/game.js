@@ -20,7 +20,7 @@ class Game {
         this.monsters = [];
         this.movements$ = new Rx.Subject();
         this.gameEvents$ = new Rx.Subject();
-        this.engine = new GameEngine();
+        this.engine = new GameEngine(this.gameEvents$);
 
         this.gameState = {
             isStarted: false,
@@ -137,7 +137,7 @@ class Game {
             this.engine.playerMap.delete(playerId);
             this.engine.playerMap.set(playerId, targetCell.id);
 
-            this.updatePlayers();
+            this.updatePlayers();  
         }
     }
 }

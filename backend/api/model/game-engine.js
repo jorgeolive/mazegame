@@ -4,13 +4,13 @@ const { Worker, isMainThread, parentPort, workerData } = require('worker_threads
 
 class GameEngine {
 
-    constructor() {
+    constructor(gameEventsObservable) {
 
         this.playerMap = new Map();
         this.monsterMap = new Map();
         this.shortestPathMap = new Map();
-        this.engineEvents$ = new Rx.Subject();
         this.movements$ = new Rx.Subject();
+        this.gameEventsObservable$ = gameEventsObservable;
     }
 
     buildPathMap = (maze) => {
@@ -29,10 +29,20 @@ class GameEngine {
             });
 
             worker.on('message', (x) => {
-                console.log(`received pathmap from worker thread.`);
-                console.log(typeof x);
-                this.shortestPathMap = x;
-                resolve();
+
+                if(x.eventType === "progressStatus"){
+                    this.gameEventsObservable$.next(x);
+
+                } else {
+                    console.log(`received pathmap from worker thread.`);
+                    console.log(typeof x);
+                    this.shortestPathMap = x;
+                    resolve();
+                }
+            });
+
+            worker.on('error', (x) => {               
+                reject(x);
             });
         }); 
     }

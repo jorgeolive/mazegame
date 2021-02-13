@@ -1,4 +1,9 @@
+
+
 module.exports.registerSocket = function (io, socket, game) {
+
+  const Rx = require("rxjs");
+  const RxOp = require('rxjs/operators');
 
   const gameRoomId = `game${game.id}`;
   socket.join(gameRoomId);
@@ -50,10 +55,17 @@ module.exports.registerSocket = function (io, socket, game) {
 
   if (game.allPlayersJoined && !game.gameState.mapServed) {
 
+    io.to(gameRoomId).emit('allPlayersJoined');
+
     console.log("initializing maze.");
-
+ 
+    game.gameEvents$.pipe(
+      RxOp.filter(x => x.eventType === "progressStatus")).
+      subscribe(x => 
+      {io.to(gameRoomId).emit('progressStatus', x)});
+    
     game.init().then( () => {
-
+ 
       console.log("serving maze!");
 
       io.to(gameRoomId).emit('gameData',
