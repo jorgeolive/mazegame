@@ -16,6 +16,7 @@ const Maze = (props) => {
 
    const playersByCell = Array.from(props.playerMap.entries());
    const monstersByCell = Array.from(props.monsterMap.entries());
+   const goodies = props.goodieMap;
 
    const getPlayers = (playersByCell, cellId) => {
 
@@ -43,7 +44,6 @@ const Maze = (props) => {
       return monsters_;
    }
 debugger;
-console.log("goodies" + Array.from(props.goodieMap.entries()));
 
    return (
    <div>
@@ -56,7 +56,7 @@ console.log("goodies" + Array.from(props.goodieMap.entries()));
                return <Cell cell={cell} key={cell.id} id={cell.id}
                   players={getPlayers(playersByCell, cell.id)}
                   monsters={getMonsters(monstersByCell, cell.id)}
-                  goodie={props.goodieMap.has(cell.id) ? props.goodieMap().get(cell.id) : null}></Cell>
+                  goodie={props.goodieMap.has(cell.id) ? props.goodieMap.get(cell.id) : null}></Cell>
             })}
       </div>
    </div>);

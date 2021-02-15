@@ -67,7 +67,7 @@ module.exports.registerSocket = function (io, socket, game) {
     game.init().then( () => {
  
       console.log("serving maze!");
-
+      console.log("goodies: ", Array.from(game.engine.goodieMap.entries()));
       io.to(gameRoomId).emit('gameData',
         {
           mazeData: {

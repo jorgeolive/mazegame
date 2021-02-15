@@ -20,9 +20,11 @@ class Player {
     }
   }
 
-  captureGoodie = (points) => {
+  captureGoodie = (increment) => {
+    console.log("increment    :", increment);
     this.points = this.points + increment;
-    this.playerEvents$.next({eventType : "pointsUpdated", playerId : this.id, points : this.points})
+    console.log("new player points:", this.points);
+    this.playerEvents$.next({eventType : "pointsUpdated", player: this.asSerializable()})
   }
 
   getRandomColor = () => {

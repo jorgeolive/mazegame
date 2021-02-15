@@ -26,7 +26,8 @@ const GamePanel = React.memo(({ gameId, playerId }) => {
   const [gameOver, updateGameOver] = React.useState(false);
   const [allPlayersJoined, updateAllPlayersJoined] = React.useState(false);
 
-  React.useEffect(() => {
+  React.useEffect(() => 
+  {
 
     socketState.emit('joinGame', { gameId });
     socketState.on("allPlayersJoined", x => updateAllPlayersJoined(true));
@@ -46,6 +47,7 @@ const GamePanel = React.memo(({ gameId, playerId }) => {
 
     socketState.on("gameStateUpdated",
       data => {
+        console.log(data);
         updateGameState(prevState => ({ ...prevState, playerMap: new Map(data.playerMap), monsterMap: new Map(data.monsterMap), goodieMap : new Map(data.goodieMap) }));
       });
 
@@ -55,10 +57,16 @@ const GamePanel = React.memo(({ gameId, playerId }) => {
           updateGameOver(true);
         }
 
-        if (data.eventType === "pointsUpdated" && playerId == data.playerId) {
+        if (data.eventType === "pointsUpdated" && playerId == data.player.id) {
+          updateGameState(prevState => {
 
-        }
-      });
+            debugger;
+            let newPlayerArray = prevState.players.filter(x => x.id != playerId);
+            newPlayerArray.push(data.player);
+    
+            return { ...prevState, players : newPlayerArray} });
+      }
+    });
 
     socketState.on("gameStarted",
       data => {

@@ -96,10 +96,10 @@ class Game {
 
             this.interval = setInterval(() => {
 
-                var v1 = performance.now();
+                //var v1 = performance.now();
                 this.engine.runGameCycle(this.players, this.monsters);
-                var v2 = performance.now();
-                console.log("monster IA cyle executed in  " + (v2 - v1) + " milliseconds");
+                //var v2 = performance.now();
+                //console.log("monster IA cyle executed in  " + (v2 - v1) + " milliseconds");
 
                 this.updatePlayers();
 
@@ -143,16 +143,21 @@ class Game {
             this.engine.playerMap.delete(playerId);
             this.engine.playerMap.set(playerId, targetCell.id);
 
-            const goodie = Array.from(this.engine.goodieMap.entries()).filter(x => x[0] == targetCell.id);
-
-            if (goodie[0] != undefined) {
-                this.engine.goodieMap.delete(targetCell.id);
-                this.players.filter(x => x.id == playerId)[0].captureGoodie(goodie[0].points);
-
-                this.pushNewGoodie();
-            }
+            this.checkIfGoodiePick(targetCell, playerId);
 
             this.updatePlayers();
+        }
+    }
+
+    checkIfGoodiePick(targetCell, playerId) {
+        const goodie = Array.from(this.engine.goodieMap.entries()).filter(x => x[0] == targetCell.id);
+
+        if (goodie[0] != undefined) {
+            console.log("goodie", goodie[0]);
+            this.engine.goodieMap.delete(targetCell.id);
+            this.players.filter(x => x.id == playerId)[0].captureGoodie(goodie[0][1].points);
+
+            this.pushNewGoodie();
         }
     }
 

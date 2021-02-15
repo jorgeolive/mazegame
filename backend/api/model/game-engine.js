@@ -84,7 +84,6 @@ class GameEngine {
             this.monsterMap.delete(monster.id);
             this.monsterMap.set(monster.id, path[path.length - 1]);
         } else {
-            //this.gameOver = true;
         }
     }
 
@@ -93,11 +92,6 @@ class GameEngine {
         monsters.forEach(monster => {
             this.moveOrAttackClosestPlayer(players, monster )
 
-        });
-
-        this.movements$.next({
-            playerMap: Array.from(this.playerMap.entries()),
-            monsterMap: Array.from(this.monsterMap.entries())
         });
     }
 }
