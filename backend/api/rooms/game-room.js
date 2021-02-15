@@ -77,7 +77,8 @@ module.exports.registerSocket = function (io, socket, game) {
             height: game.height,
             width: game.width,
             playerMap: Array.from(game.engine.playerMap.entries()),
-            monsterMap: Array.from(game.engine.monsterMap.entries())
+            monsterMap: Array.from(game.engine.monsterMap.entries()),
+            goodieMap:  Array.from(game.engine.goodieMap.entries())
           }
         });
 

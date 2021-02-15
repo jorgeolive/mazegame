@@ -52,7 +52,7 @@ module.exports.gameRoomChannel = function (app) {
         socket.on("createGame", ({ width, height, maxPlayers, monsters }) => {
 
             const gameId = Math.floor(Math.random() * 1000);
-            const game = new Game(gameId, width, height, maxPlayers, monsters);
+            const game = new Game(gameId, width, height, maxPlayers, monsters, 10);
             currentGames.set(gameId, game);
 
             notifyUpdate = true;

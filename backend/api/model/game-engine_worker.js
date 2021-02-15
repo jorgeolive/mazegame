@@ -12,6 +12,7 @@ const buildPathMap = (cells, adjancecyList, parentPort) => {
         
         let map = new Map();
 
+        //TODO This can be shortened /2. 
         cells.forEach(y => {
            map.set(y.id, getShortestPathToBFS(x, y, adjancecyList));
         });

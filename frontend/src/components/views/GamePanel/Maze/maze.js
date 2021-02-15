@@ -12,6 +12,8 @@ const Maze = (props) => {
       backgroundColor: 'black'
    }
 
+   
+
    const playersByCell = Array.from(props.playerMap.entries());
    const monstersByCell = Array.from(props.monsterMap.entries());
 
@@ -29,25 +31,34 @@ const Maze = (props) => {
 
       return players;
    }
-   
+
    const getMonsters = (monsters, cellId) => {
       const monsters_ = [];
       const ids = monsters.filter(x => x[1] === cellId);
 
       ids.forEach(x => {
-            monsters_.push(ids[0]);       
+         monsters_.push(ids[0]);
       });
 
       return monsters_;
    }
+debugger;
+console.log("goodies" + Array.from(props.goodieMap.entries()));
 
-   return (<div style={styles}>
-      {props.cells.
-         map(cell => {
-            return <Cell cell={cell} key={cell.id} id={cell.id} 
-            players={getPlayers(playersByCell, cell.id)} 
-            monsters={getMonsters(monstersByCell, cell.id)}></Cell>
-         })}
+   return (
+   <div>
+      <div>
+      {props.players.map(x => {return <span>Player {x.name} - {x.points} points</span>})}
+      </div>
+      <div style={styles}>
+         {props.cells.
+            map(cell => {
+               return <Cell cell={cell} key={cell.id} id={cell.id}
+                  players={getPlayers(playersByCell, cell.id)}
+                  monsters={getMonsters(monstersByCell, cell.id)}
+                  goodie={props.goodieMap.has(cell.id) ? props.goodieMap().get(cell.id) : null}></Cell>
+            })}
+      </div>
    </div>);
 }
 

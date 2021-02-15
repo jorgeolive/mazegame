@@ -4,13 +4,15 @@ const Rx = require("rxjs");
 const { Monster } = require("./monster");
 const { Cell } = require("./cell");
 const { performance } = require('perf_hooks');
+const { Goodie } = require("./goodie");
 
 class Game {
 
     maze;
 
-    constructor(id, width, height, maxPlayers, maxMonsters) {
+    constructor(id, width, height, maxPlayers, maxMonsters, totalGoodies) {
 
+        this.goodies = Goodie.goodieGenerator(totalGoodies);
         this.id = id;
         this.width = width;
         this.height = height;
@@ -20,6 +22,7 @@ class Game {
         this.monsters = [];
         this.movements$ = new Rx.Subject();
         this.gameEvents$ = new Rx.Subject();
+
         this.engine = new GameEngine(this.gameEvents$);
 
         this.gameState = {
@@ -72,6 +75,8 @@ class Game {
             });
         });
 
+        this.pushNewGoodie();
+
         for (let i = 0; i < this.maxMonsters; i++)
             this.monsters.push(new Monster(Math.floor(Math.random() * 10000)));
 
@@ -106,7 +111,8 @@ class Game {
 
         this.movements$.next({
             playerMap: Array.from(this.engine.playerMap.entries()),
-            monsterMap: Array.from(this.engine.monsterMap.entries())
+            monsterMap: Array.from(this.engine.monsterMap.entries()),
+            goodieMap: Array.from(this.engine.goodieMap.entries())
         });
     }
 
@@ -137,7 +143,23 @@ class Game {
             this.engine.playerMap.delete(playerId);
             this.engine.playerMap.set(playerId, targetCell.id);
 
-            this.updatePlayers();  
+            const goodie = Array.from(this.engine.goodieMap.entries()).filter(x => x[0] == targetCell.id);
+
+            if (goodie[0] != undefined) {
+                this.engine.goodieMap.delete(targetCell.id);
+                this.players.filter(x => x.id == playerId)[0].captureGoodie(goodie[0].points);
+
+                this.pushNewGoodie();
+            }
+
+            this.updatePlayers();
+        }
+    }
+
+    pushNewGoodie() {
+        if(this.goodies.length != 0){
+            const cellId = this.maze.getRandomCell().id;
+            this.engine.goodieMap.set(cellId, this.goodies.shift());
         }
     }
 }

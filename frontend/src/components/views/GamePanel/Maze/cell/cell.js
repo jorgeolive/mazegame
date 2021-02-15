@@ -2,6 +2,7 @@ import React from 'react';
 import Player from '../player/player';
 import './cell.css';
 import Monster from '../monster/monster'
+import  Goodie  from '../goodie/goodie';
 
 const Cell = (props) => {
 
@@ -15,7 +16,7 @@ const Cell = (props) => {
     return <div className={classes}>
         {props.players.length > 0 ? props.players.map(player => <Player color={player.colorCode}></Player>) : null }
         {props.monsters.length > 0 ? props.monsters.map(() => <Monster></Monster>) : null }
-
+        {props.goodie != null ?<Goodie symbol="🐑"></Goodie>: null}
            </div>;
 }
 

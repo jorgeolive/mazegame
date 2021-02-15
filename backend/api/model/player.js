@@ -7,6 +7,7 @@ class Player {
     this.colorCode = this.getRandomColor();
     this.isAlive = true;
     this.playerEvents$ = new Rx.Subject();
+    this.points = 0;
     //this.hasJoined = false;
   }
 
@@ -14,8 +15,14 @@ class Player {
     return {
       id: this.id,
       name: this.name,
-      colorCode : this.colorCode
+      colorCode : this.colorCode,
+      points: this.points
     }
+  }
+
+  captureGoodie = (points) => {
+    this.points = this.points + increment;
+    this.playerEvents$.next({eventType : "pointsUpdated", playerId : this.id, points : this.points})
   }
 
   getRandomColor = () => {

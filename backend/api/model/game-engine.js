@@ -9,6 +9,7 @@ class GameEngine {
         this.playerMap = new Map();
         this.monsterMap = new Map();
         this.shortestPathMap = new Map();
+        this.goodieMap = new Map();
         this.movements$ = new Rx.Subject();
         this.gameEventsObservable$ = gameEventsObservable;
     }
