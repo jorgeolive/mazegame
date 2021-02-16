@@ -110,10 +110,10 @@ class Game {
 
             this.interval = setInterval(() => {
 
-                //var v1 = performance.now();
+                var v1 = performance.now();
                 this.engine.runGameCycle(this.players, this.monsters);
-                //var v2 = performance.now();
-                //console.log("monster IA cyle executed in  " + (v2 - v1) + " milliseconds");
+                var v2 = performance.now();
+                console.log("monster IA cyle executed in  " + (v2 - v1) + " milliseconds");
             }, 300);
         }
     }
