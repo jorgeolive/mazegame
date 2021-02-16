@@ -1,5 +1,5 @@
 const Rx = require("rxjs");
-const Cell = require("./cell");
+const {Cell} = require("./cell");
 const { Worker, isMainThread, parentPort, workerData } = require('worker_threads');
 
 class GameEngine {
@@ -10,7 +10,6 @@ class GameEngine {
         this.monsterMap = new Map();
         this.shortestPathMap = new Map();
         this.goodieMap = new Map();
-        this.movements$ = new Rx.Subject();
         this.gameEventsObservable$ = gameEventsObservable;
     }
 
@@ -31,7 +30,7 @@ class GameEngine {
 
             worker.on('message', (x) => {
 
-                if(x.eventType === "progressStatus"){
+                if (x.eventType === "progressStatus") {
                     this.gameEventsObservable$.next(x);
 
                 } else {
@@ -42,56 +41,123 @@ class GameEngine {
                 }
             });
 
-            worker.on('error', (x) => {               
+            worker.on('error', (x) => {
                 reject(x);
             });
-        }); 
+        });
     }
 
-    moveOrAttackClosestPlayer = (players,monster) => {
+    placeMonster(monsterId, cellId) {
+        this.monsterMap.set(monsterId, cellId);
+    }
+
+    pushPlayerMovement(player, direction, maze) {
+        const playerId = player.id;
+        const position = this.playerMap.get(playerId);
+        const currentCell = maze.cellMap.get(position);
+        let targetCell;
+
+        switch (direction) {
+            case "ArrowLeft":
+                targetCell = maze.cellMap.get(Cell.getId(currentCell.i, currentCell.j - 1));
+                break;
+            case "ArrowRight":
+                targetCell = maze.cellMap.get(Cell.getId(currentCell.i, currentCell.j + 1));
+                break;
+            case "ArrowUp":
+                targetCell = maze.cellMap.get(Cell.getId(currentCell.i - 1, currentCell.j));
+                break;
+            case "ArrowDown":
+                targetCell = maze.cellMap.get(Cell.getId(currentCell.i + 1, currentCell.j));
+                break;
+        }
+
+        if (position && targetCell && maze.areCellsConnected(position, targetCell.id)) {
+
+            this.playerMap.delete(playerId);
+            this.playerMap.set(playerId, targetCell.id);
+
+            this.checkIfGoodiePick(targetCell, player);
+
+            this.pushNewMapUpdate();
+        }
+    }
+
+    
+    moveOrAttackClosestPlayer = (players, monster) => {
 
         const pathMap = new Map();
         let minPath = Number.POSITIVE_INFINITY;
         let nearestPlayer;
-        let monsterPlayerCollision = false;
+        let anyPlayerCaught = false;
 
         players.filter(x => x.isAlive).forEach(plyr => {
+            if (!anyPlayerCaught) {
 
-            const monsterPosition = this.monsterMap.get(monster.id);
-            const position = this.playerMap.get(plyr.id);
+                const monsterPosition = this.monsterMap.get(monster.id);
+                const position = this.playerMap.get(plyr.id);
 
-            monsterPlayerCollision = monsterPosition === position;
+                if (monsterPosition !== position) {
 
-            if (!monsterPlayerCollision) {
+                    const path = this.shortestPathMap.get(position).get(monsterPosition);
+                    pathMap.set(plyr.id, path);
 
-                const path = this.shortestPathMap.get(position).get(monsterPosition);
-
-                pathMap.set(plyr.id, path);
-
-                if (path.length < minPath) {
-                    minPath = path.length;
-                    nearestPlayer = plyr;
+                    if (path.length < minPath) {                        
+                        minPath = path.length;
+                        nearestPlayer = plyr;
+                    }
+                } else {
+                    this.playerMap.delete(plyr.id);
+                    plyr.kill();
+                    anyPlayerCaught = true;
                 }
-            } else {
-                this.playerMap.delete(plyr.id);
-                plyr.kill();
             }
         });
 
-        if (!monsterPlayerCollision) {
-            const path = pathMap.get(nearestPlayer.id);
-
-            this.monsterMap.delete(monster.id);
-            this.monsterMap.set(monster.id, path[path.length - 1]);
+        if (!anyPlayerCaught) {
+            this.moveMonsterToClosestPlayer(pathMap, nearestPlayer, monster);
+            this.pushNewMapUpdate();
         } else {
+            if(players.every(x => !x.isAlive)){ 
+                this.gameEventsObservable$.next({eventType: "allPlayersDead"});
+            } else {
+                this.pushNewMapUpdate();
+            }
+        }
+    }
+
+    moveMonsterToClosestPlayer(pathMap, nearestPlayer, monster) {
+        const path = pathMap.get(nearestPlayer.id);
+        this.monsterMap.delete(monster.id);
+        this.monsterMap.set(monster.id, path[path.length - 1]);
+    }
+
+    pushNewMapUpdate() {
+        this.gameEventsObservable$.next({
+            eventType: "mapUpdate",
+            playerMap: Array.from(this.playerMap.entries()),
+            monsterMap: Array.from(this.monsterMap.entries()),
+            goodieMap: Array.from(this.goodieMap.entries())
+        });
+    }
+
+
+    checkIfGoodiePick(targetCell, player) {
+
+        const goodie = Array.from(this.goodieMap.entries()).filter(x => x[0] == targetCell.id);
+
+        if (goodie[0] != undefined) {
+            this.goodieMap.delete(targetCell.id);
+            player.captureGoodie(goodie[0][1].points);
+
+            this.gameEventsObservable$.next({eventType: "goodieCaptured"});
         }
     }
 
     runGameCycle = (players, monsters) => {
 
         monsters.forEach(monster => {
-            this.moveOrAttackClosestPlayer(players, monster )
-
+            this.moveOrAttackClosestPlayer(players, monster)
         });
     }
 }

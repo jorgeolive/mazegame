@@ -27,13 +27,15 @@ module.exports.registerSocket = function (io, socket, game) {
 
       console.log("all players joined and ack'ed their data. starting game...");
 
-      game.movements$.subscribe(x => {
-        io.to(gameRoomId).emit('gameStateUpdated', x);
-      }, x_ => console.log(x_), () => console.log("completed"));
-
-      game.gameEvents$.subscribe(x => {
-        io.to(gameRoomId).emit('gameEvent', x);
-      }, x_ => console.log(x_), () => console.log(x));
+      game.gameEvents$.pipe(
+        RxOp.filter(x => x.eventType !== 'progressStatus')).subscribe(x =>
+         {
+            x.eventType === "mapUpdate" ?
+              io.to(gameRoomId).emit('gameStateUpdated', x) :
+              io.to(gameRoomId).emit('gameEvent', x);
+         },
+        x_ => console.log(x_),
+        () => console.log("completed"));
 
       game.start();
 
@@ -56,18 +58,16 @@ module.exports.registerSocket = function (io, socket, game) {
   if (game.allPlayersJoined && !game.gameState.mapServed) {
 
     io.to(gameRoomId).emit('allPlayersJoined');
-
     console.log("initializing maze.");
- 
+
     game.gameEvents$.pipe(
-      RxOp.filter(x => x.eventType === "progressStatus")).
+      RxOp.filter(x => x.eventType === 'progressStatus')).
       subscribe(x => 
       {io.to(gameRoomId).emit('progressStatus', x)});
-    
+ 
     game.init().then( () => {
  
       console.log("serving maze!");
-      console.log("goodies: ", Array.from(game.engine.goodieMap.entries()));
       io.to(gameRoomId).emit('gameData',
         {
           mazeData: {

@@ -1,6 +1,7 @@
 const { GameEngine } = require("./game-engine");
 const { Maze } = require("./maze");
 const Rx = require("rxjs");
+const RxOp = require('rxjs/operators');
 const { Monster } = require("./monster");
 const { Cell } = require("./cell");
 const { performance } = require('perf_hooks');
@@ -25,6 +26,7 @@ class Game {
 
         this.engine = new GameEngine(this.gameEvents$);
 
+        //Smell
         this.gameState = {
             isStarted: false,
             mapServed: false,
@@ -52,7 +54,7 @@ class Game {
     }
 
     getPlayer(playerId) {
-        return this.players.find(elem => elem.id = playerId)[0];
+        return this.players.find(elem => elem.id = playerId);
     }
 
     init() {
@@ -62,6 +64,30 @@ class Game {
             throw new Error("Waiting for players to join");
         }
 
+        this.gameEvents$.pipe(
+            RxOp.filter(x => x.eventType === "gameOver")).subscribe(x => this.stop());
+
+        this.gameEvents$.pipe(
+            RxOp.filter(x => x.eventType === "goodieCaptured")).subscribe(x => this.pushNewGoodie());
+
+        this.createAndPlaceMonsters();
+        this.pushNewGoodie();
+        this.subscribeToPlayerEvents();
+
+        return this.engine.buildPathMap(this.maze);
+    }
+
+    createAndPlaceMonsters() {
+        for (let i = 0; i < this.maxMonsters; i++)
+            this.monsters.push(new Monster(Math.floor(Math.random() * 10000)));
+
+        this.monsters.forEach(monster => {
+            const randomCellId = this.maze.getRandomCell().id;
+            this.engine.placeMonster(monster.id,randomCellId);
+        });
+    }
+  
+    subscribeToPlayerEvents() {
         this.players.forEach(plyr => {
             const cellId = this.maze.getRandomCell().id;
             this.engine.playerMap.set(plyr.id, cellId);
@@ -74,18 +100,6 @@ class Game {
                 }
             });
         });
-
-        this.pushNewGoodie();
-
-        for (let i = 0; i < this.maxMonsters; i++)
-            this.monsters.push(new Monster(Math.floor(Math.random() * 10000)));
-
-        this.monsters.forEach(monster => {
-            const cellId = this.maze.getRandomCell().id;
-            this.engine.monsterMap.set(monster.id, cellId);
-        });
-
-        return this.engine.buildPathMap(this.maze);
     }
 
     start() {
@@ -100,73 +114,26 @@ class Game {
                 this.engine.runGameCycle(this.players, this.monsters);
                 //var v2 = performance.now();
                 //console.log("monster IA cyle executed in  " + (v2 - v1) + " milliseconds");
-
-                this.updatePlayers();
-
             }, 300);
         }
     }
 
-    updatePlayers = () => {
-
-        this.movements$.next({
-            playerMap: Array.from(this.engine.playerMap.entries()),
-            monsterMap: Array.from(this.engine.monsterMap.entries()),
-            goodieMap: Array.from(this.engine.goodieMap.entries())
-        });
-    }
-
     pushMovement = (playerId, direction) => {
 
-        //No estoy seguro que objeto deberia gestionar esta logica. Engine?
-        const position = this.engine.playerMap.get(playerId);
-        const currentCell = this.maze.cellMap.get(position);
-        let targetCell;
-
-        switch (direction) {
-            case "ArrowLeft":
-                targetCell = this.maze.cellMap.get(Cell.getId(currentCell.i, currentCell.j - 1));
-                break;
-            case "ArrowRight":
-                targetCell = this.maze.cellMap.get(Cell.getId(currentCell.i, currentCell.j + 1));
-                break;
-            case "ArrowUp":
-                targetCell = this.maze.cellMap.get(Cell.getId(currentCell.i - 1, currentCell.j));
-                break;
-            case "ArrowDown":
-                targetCell = this.maze.cellMap.get(Cell.getId(currentCell.i + 1, currentCell.j));
-                break;
-        }
-
-        if (position && targetCell && this.maze.areCellsConnected(position, targetCell.id)) {
-
-            this.engine.playerMap.delete(playerId);
-            this.engine.playerMap.set(playerId, targetCell.id);
-
-            this.checkIfGoodiePick(targetCell, playerId);
-
-            this.updatePlayers();
-        }
-    }
-
-    checkIfGoodiePick(targetCell, playerId) {
-        const goodie = Array.from(this.engine.goodieMap.entries()).filter(x => x[0] == targetCell.id);
-
-        if (goodie[0] != undefined) {
-            console.log("goodie", goodie[0]);
-            this.engine.goodieMap.delete(targetCell.id);
-            this.players.filter(x => x.id == playerId)[0].captureGoodie(goodie[0][1].points);
-
-            this.pushNewGoodie();
+        if (this.gameState.isStarted) {
+            this.engine.pushPlayerMovement(
+                this.getPlayer(playerId),
+                 direction, 
+                 this.maze);
         }
     }
 
     pushNewGoodie() {
-        if(this.goodies.length != 0){
+        if (this.goodies.length != 0) {
             const cellId = this.maze.getRandomCell().id;
             this.engine.goodieMap.set(cellId, this.goodies.shift());
         }
-    }
+    }   
 }
 
 module.exports = {
