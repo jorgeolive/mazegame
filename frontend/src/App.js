@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './App.css';
-import GameRoom from './components/views/GameRoom/gameRoom';
+import GameRoom from './components/views/GameRoom/GameRoom';
 import PlayerNameInput from './components/views/menu/playerNameInput';
 import { SocketContext, socket } from '../src/context/socket';
 

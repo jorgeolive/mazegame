@@ -19,8 +19,6 @@ class GameEngine {
 
         return new Promise((resolve, reject) => {
 
-            //if debugging 
-            //const worker = new Worker('./backend/api/model/game-engine_worker.js', {
             const worker = new Worker('./api/model/game-engine_worker.js', {
                 workerData: {
                     cells: maze.cells,

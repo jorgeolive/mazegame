@@ -1,7 +1,7 @@
 import React from 'react';
-import GameListView from './GameList/gameListView';
-import CreateGame from './CreateGame/createGame';
-import PlayerListView from './PlayerList/playerListView';
+import GameListView from './GameList/GameListView';
+import CreateGame from './CreateGame/CreateGame';
+import PlayerListView from './PlayerList/PlayerListView';
 
 const GameRoomView = (props) => {
 

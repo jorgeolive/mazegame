@@ -8,7 +8,6 @@ class Player {
     this.isAlive = true;
     this.playerEvents$ = new Rx.Subject();
     this.points = 0;
-    //this.hasJoined = false;
   }
 
   asSerializable = () => {

@@ -1,6 +1,6 @@
 import React from 'react';
-import GameRoomView from './gameRoomView';
-import GamePanel from '../GamePanel/gamePanel'
+import GameRoomView from './GameRoomView';
+import GamePanel from '../GamePanel/GamePanel'
 import {SocketContext} from "../../../context/socket";
 
 const ENDPOINT = "http://localhost:3000";
